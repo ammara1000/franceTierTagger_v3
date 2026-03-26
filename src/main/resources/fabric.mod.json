@@ -1,0 +1,41 @@
+{
+	"schemaVersion": 1,
+	"id": "francetiers_tagger",
+	"version": "${version}",
+	"name": "francetiers_tagger",
+	"description": "you can see the pvp tier of players from FranceTiers under there names",
+	"authors": [
+		"amara1000",
+		"some textures by MRpinguin"
+	],
+	"contact": {
+		"homepage": "https://discord.gg/S88xZgmzm2",
+		"sources": "https://github.com/ammara1000/franceTierTagger_v2"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/francetiers_tagger/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"client": [
+			"nerd.amara.Francetiers_tagger"
+		]
+	},
+	"mixins": [
+		"francetiers_tagger.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.15.1",
+		"minecraft": "~1.21.4",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	},
+	"client_resources": [
+		{
+			"id": "francetiers_tagger:lol",
+			"enabled": true
+		}
+	]
+}

@@ -1,0 +1,51 @@
+{
+    "providers": [
+        {
+            "type": "bitmap",
+            "file": "frtl:font/gamemode.png",
+            "ascent": 8,
+            "height": 10,
+            "width": 10,
+            "chars": [
+                "\uEF00\uEF01\uEF02\uEF03\uEF04",
+				"\uEF05\uEF06\uEF07\uEF08\uEF09"
+            ]
+        },
+		{
+            "type": "bitmap",
+            "file": "frtl:font/gamemode.png",
+            "ascent": 12,
+            "height": 15,
+            "width": 15,
+            "chars": [
+                "\uEd00\uEd01\uEd02\uEd03\uEd04",
+				"\uEd05\uEd06\uEd07\uEd08\uEd09"
+            ]
+        },
+		{
+            "type": "bitmap",
+            "file": "frtl:font/tier.png",
+            "ascent": 8,
+            "height": 10,
+            "width": 10,
+            "chars": [
+                "\uEE00\uEE01\uEE02\uEE03\uEE04\uEE05\uEE06",
+				"\uEE07\uEE08\uEE09\uEE0a\uEE0b\uEE0c\uEE0d"
+            ]
+        },
+        {
+            "type": "bitmap",
+            "file": "frtl:font/lol.png",
+            "ascent": 1,
+            "height": 1,
+            "width": 1,
+            "chars": [
+                "\uEEEE"
+            ]
+        },
+		{
+            "type": "reference",
+            "id": "minecraft:default"
+        }
+    ]
+}
