@@ -15,7 +15,7 @@ import java.util.Objects;
 public class Francetiers_tagger implements ClientModInitializer {
 	public static final String MOD_ID = "francetiers_tagger";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    public static String web_url="https://old.francetiers.fr/search_playerV2.php?pseudo=";;
+    public static String web_url="https://francetiers.fr/search_playerV2.php?pseudo=";;
 
 	@Override
 	public void onInitializeClient() {
