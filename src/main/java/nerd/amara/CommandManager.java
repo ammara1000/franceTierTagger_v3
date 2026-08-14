@@ -6,8 +6,6 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import nerd.amara.tiers.PlayerInfo;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.FontManager;
-import net.minecraft.client.font.FontType;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
@@ -20,7 +18,6 @@ import java.util.stream.Collectors;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
-import static net.minecraft.text.StringVisitable.styled;
 
 public class CommandManager {
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -35,17 +32,23 @@ public class CommandManager {
                                 return 1;
                             }
 
-                            new Thread(() -> {
-                                PlayerInfo info = Http.getJson(Francetiers_tagger.web_url+name, PlayerInfo.class);
-                                if (info != null) {
-                                    Text text=Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new StyleSpriteSource.Font(Identifier.of("frtl","lol"))));
-                                    MinecraftClient.getInstance().player.sendMessage(text,false);
-                                } else {
-                                    Text errorText = Text.literal("Joueur introuvable: ").styled(s -> s.withColor(Formatting.RED))
-                                            .append(Text.literal(name).styled(s -> s.withColor(Formatting.WHITE)));
-                                    MinecraftClient.getInstance().player.sendMessage(errorText, false);
-                                }
-                            }).start();
+                            RequestManager.fetchPlayerInfo(name,
+                                    (PlayerInfo info) -> {
+                                        Text text = Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new StyleSpriteSource.Font(Identifier.of("frtl", "lol"))));
+                                        MinecraftClient.getInstance().player.sendMessage(text, false);
+                                    },
+                                    (Http.Status status) -> {
+                                        String reason = switch (status) {
+                                            case NOT_FOUND -> "joueur introuvable";
+                                            case SERVER_ERROR -> "le serveur FranceTiers ne répond pas correctement, réessaie plus tard";
+                                            case NETWORK_ERROR -> "impossible de contacter FranceTiers, vérifie ta connexion";
+                                            case PARSE_ERROR -> "réponse invalide reçue de FranceTiers";
+                                            default -> "erreur inconnue";
+                                        };
+                                        Text errorText = Text.literal("Erreur (" + name + "): ").styled(s -> s.withColor(Formatting.RED))
+                                                .append(Text.literal(reason).styled(s -> s.withColor(Formatting.WHITE)));
+                                        MinecraftClient.getInstance().player.sendMessage(errorText, false);
+                                    });
 
                             return 1;
                         }))
