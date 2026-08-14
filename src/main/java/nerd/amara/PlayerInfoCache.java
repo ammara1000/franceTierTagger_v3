@@ -2,12 +2,12 @@ package nerd.amara;
 
 import nerd.amara.tiers.PlayerInfo;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerInfoCache {
     private static final long TTL_MILLIS = 5 * 60 * 1000; // 5 min
-    private static final Map<String, Entry> cache = new ConcurrentHashMap<>();
+    private static final int MAX_ENTRIES = 150;
 
     private static class Entry {
         final PlayerInfo info;
@@ -18,7 +18,14 @@ public class PlayerInfoCache {
         }
     }
 
-    public static PlayerInfo get(String pseudo) {
+    private static final Map<String, Entry> cache = new LinkedHashMap<>(16, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, Entry> eldest) {
+            return size() > MAX_ENTRIES;
+        }
+    };
+
+    public static synchronized PlayerInfo get(String pseudo) {
         Entry entry = cache.get(pseudo);
         if (entry == null) {
             return null;
@@ -30,7 +37,7 @@ public class PlayerInfoCache {
         return entry.info;
     }
 
-    public static void put(String pseudo, PlayerInfo info) {
+    public static synchronized void put(String pseudo, PlayerInfo info) {
         cache.put(pseudo, new Entry(info, System.currentTimeMillis()));
     }
 }
