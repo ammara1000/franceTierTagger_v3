@@ -8,8 +8,6 @@ import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -33,7 +31,7 @@ public class Keybinds {
             "Mace",
             "Mod Off"
     );
-    public static void RedgisterKeybinds(){
+    public static void registerKeybinds(){
         change_gamemode=KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.mod.change_gamemode",
                 InputUtil.Type.KEYSYM,
@@ -57,13 +55,10 @@ public class Keybinds {
 
                 if (world != null) {
                     for (AbstractClientPlayerEntity player : world.getPlayers()) {
-                        new Thread(() -> {
-                            PlayerInfo info = Http.getJson(Francetiers_tagger.web_url+player.getName().getString(), PlayerInfo.class);
-                            if (info != null) {
-                                ((TierModifier)player).setSuffix(ShowedTier.showed_tier(info));
-                                //player.sendMessage(Text.literal(ShowedTier.showed_tier(info)),false);//----
-                            }
-                        }).start();
+                        String pseudo = player.getName().getString();
+                        RequestManager.fetchPlayerInfo(pseudo,
+                                (PlayerInfo info) -> ((TierModifier) player).setSuffix(ShowedTier.showed_tier(info)),
+                                null);
                     }
                 }
             }
