@@ -3,7 +3,7 @@ package nerd.amara;
 import nerd.amara.tiers.PlayerInfo;
 import nerd.amara.tiers.Tier;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -55,6 +55,7 @@ public class ShowedTier {
             Map.entry("NethPot", "\uEF07"),
             Map.entry("Axe", "\uEF08")
     );
+
     public static String showed_tier(PlayerInfo info){
         ModConfig config = ConfigManager.getConfig();
         if (Objects.equals(config.gamemode, "Mod Off")){
@@ -63,66 +64,46 @@ public class ShowedTier {
         if (info==null){
             return "";
         }
-        String best_actual_gamemode=null;
-        Integer best_retired_gamemode=null;
+
         if (!Objects.equals(config.gamemode, "All")) {
-            if (info.tiers != null) {
-                if (!Objects.equals(info.tiers.get(config.gamemode).tier, "N/A")) {
-                    return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.get(info.tiers.get(config.gamemode).tier) + "" + gamemode_emoji.get(info.tiers.get(config.gamemode).category);
+            if (info.tiers != null && info.tiers.containsKey(config.gamemode)) {
+                Tier specific = info.tiers.get(config.gamemode);
+                if (!Objects.equals(specific.tier, "N/A")) {
+                    return formatBadge(specific.tier, specific.category);
                 }
             }
             if (info.retired_tiers != null) {
-                for (int i = 0; i < info.retired_tiers.size(); i++) {
-                    Tier element = info.retired_tiers.get(i);
+                for (Tier element : info.retired_tiers) {
                     if (Objects.equals(element.category, config.gamemode)) {
-                        return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.get(info.retired_tiers.get(i).tier) + "" + gamemode_emoji.get(info.retired_tiers.get(i).category);
+                        return formatBadge(element.tier, element.category);
                     }
                 }
             }
         }
-        if (info.tiers!=null) {
-            for (String key : info.tiers.keySet()) {
-                Tier value = info.tiers.get(key);
-                if (best_actual_gamemode==null & !Objects.equals(info.tiers.get(key).tier, "N/A")){
-                    best_actual_gamemode = key;
+
+        if (info.tiers != null) {
+            String bestActiveKey = bestActiveGamemode(info.tiers);
+            Integer bestRetiredIdx = info.retired_tiers != null ? bestRetiredIndex(info.retired_tiers) : null;
+
+            if (bestRetiredIdx != null) {
+                Tier bestRetired = info.retired_tiers.get(bestRetiredIdx);
+                if (bestActiveKey == null) {
+                    return formatBadge(bestRetired.tier, bestRetired.category);
                 }
-                else {
-                    if (!Objects.equals(info.tiers.get(key).tier, "N/A")){
-                        if (importance.get(info.tiers.get(best_actual_gamemode).tier) < importance.get(info.tiers.get(key).tier)) {
-                            best_actual_gamemode = key;
-                        }
-                    }
-                }
-            }
-            if (info.retired_tiers != null) {
-                for (int i = 0; i < info.retired_tiers.size(); i++) {
-                    Tier element = info.retired_tiers.get(i);
-                    if (best_retired_gamemode == null){
-                        best_retired_gamemode = i;
-                    }
-                    else{
-                        if (importance.get(info.retired_tiers.get(best_retired_gamemode).tier) < importance.get(info.retired_tiers.get(i).tier)) {
-                            best_retired_gamemode = i;
-                        }
-                    }
+                Tier bestActive = info.tiers.get(bestActiveKey);
+                if (importance.get(bestRetired.tier) > importance.get(bestActive.tier)) {
+                    return formatBadge(bestRetired.tier, bestRetired.category);
                 }
             }
-            if (best_retired_gamemode != null) {
-                if (best_actual_gamemode == null){
-                    return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.get( info.retired_tiers.get(best_retired_gamemode).tier ) + "" + gamemode_emoji.get( info.retired_tiers.get(best_retired_gamemode).category );
-                }
-                else {
-                    if (importance.get(info.retired_tiers.get(best_retired_gamemode).tier) > importance.get(info.tiers.get(best_actual_gamemode).tier)) {
-                        return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.get( info.retired_tiers.get(best_retired_gamemode).tier ) + "" + gamemode_emoji.get( info.retired_tiers.get(best_retired_gamemode).category );
-                    }
-                }
-            }
-            if (best_actual_gamemode != null) {
-                return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.get( info.tiers.get(best_actual_gamemode).tier ) + "" + gamemode_emoji.get( info.tiers.get(best_actual_gamemode).category );
+
+            if (bestActiveKey != null) {
+                Tier bestActive = info.tiers.get(bestActiveKey);
+                return formatBadge(bestActive.tier, bestActive.category);
             }
         }
         return "";
     }
+
     public static String showed_message(PlayerInfo info){
         if (info.tiers==null) {
             return "JOUEUR NON CLASSÉ";
@@ -132,7 +113,7 @@ public class ShowedTier {
         boolean hasTier=false;
         for (String key : info.tiers.keySet()) {
             Tier value = info.tiers.get(key);
-            if (!Objects.equals(info.tiers.get(key).tier, "N/A")){
+            if (!Objects.equals(value.tier, "N/A")){
                 msg=msg+"\n      "+tiers_emoji.get( value.tier )+" "+gamemode_emoji.get( key )+" "+key;
                 hasTier=true;
             }
@@ -141,5 +122,34 @@ public class ShowedTier {
             return "JOUEUR NON CLASSÉ";
         }
         return msg;
+    }
+
+    private static String formatBadge(String tier, String category) {
+        return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.get(tier) + "" + gamemode_emoji.get(category);
+    }
+
+    private static String bestActiveGamemode(Map<String, Tier> tiers) {
+        String best = null;
+        for (String key : tiers.keySet()) {
+            String tier = tiers.get(key).tier;
+            if (Objects.equals(tier, "N/A")) {
+                continue;
+            }
+            if (best == null || importance.get(tiers.get(best).tier) < importance.get(tier)) {
+                best = key;
+            }
+        }
+        return best;
+    }
+
+    private static Integer bestRetiredIndex(List<Tier> retiredTiers) {
+        Integer best = null;
+        for (int i = 0; i < retiredTiers.size(); i++) {
+            String tier = retiredTiers.get(i).tier;
+            if (best == null || importance.get(retiredTiers.get(best).tier) < importance.get(tier)) {
+                best = i;
+            }
+        }
+        return best;
     }
 }
