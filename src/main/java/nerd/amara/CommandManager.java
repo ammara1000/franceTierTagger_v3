@@ -31,12 +31,13 @@ public class CommandManager {
                             String name = StringArgumentType.getString(context, "name");
                             PlayerInfo info = Http.getJson(Francetiers_tagger.web_url+name, PlayerInfo.class);
                             if (info != null) {
-
                                 Text text=Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new StyleSpriteSource.Font(Identifier.of("frtl","lol"))));
                                 MinecraftClient.getInstance().player.sendMessage(text,false);
+                            } else {
+                                Text errorText = Text.literal("Joueur introuvable: ").styled(s -> s.withColor(Formatting.RED))
+                                        .append(Text.literal(name).styled(s -> s.withColor(Formatting.WHITE)));
+                                MinecraftClient.getInstance().player.sendMessage(errorText, false);
                             }
-
-
 
                             return 1;
                         }))
