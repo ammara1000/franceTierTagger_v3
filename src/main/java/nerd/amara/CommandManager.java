@@ -29,15 +29,23 @@ public class CommandManager {
                         .suggests(playerNameSuggester())
                         .executes(context -> {
                             String name = StringArgumentType.getString(context, "name");
-                            PlayerInfo info = Http.getJson(Francetiers_tagger.web_url+name, PlayerInfo.class);
-                            if (info != null) {
-                                Text text=Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new StyleSpriteSource.Font(Identifier.of("frtl","lol"))));
-                                MinecraftClient.getInstance().player.sendMessage(text,false);
-                            } else {
-                                Text errorText = Text.literal("Joueur introuvable: ").styled(s -> s.withColor(Formatting.RED))
-                                        .append(Text.literal(name).styled(s -> s.withColor(Formatting.WHITE)));
+                            if (name == null || name.isBlank()) {
+                                Text errorText = Text.literal("Merci d'indiquer un pseudo, ex: /francetiers <pseudo>").styled(s -> s.withColor(Formatting.RED));
                                 MinecraftClient.getInstance().player.sendMessage(errorText, false);
+                                return 1;
                             }
+
+                            new Thread(() -> {
+                                PlayerInfo info = Http.getJson(Francetiers_tagger.web_url+name, PlayerInfo.class);
+                                if (info != null) {
+                                    Text text=Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new StyleSpriteSource.Font(Identifier.of("frtl","lol"))));
+                                    MinecraftClient.getInstance().player.sendMessage(text,false);
+                                } else {
+                                    Text errorText = Text.literal("Joueur introuvable: ").styled(s -> s.withColor(Formatting.RED))
+                                            .append(Text.literal(name).styled(s -> s.withColor(Formatting.WHITE)));
+                                    MinecraftClient.getInstance().player.sendMessage(errorText, false);
+                                }
+                            }).start();
 
                             return 1;
                         }))
@@ -47,7 +55,7 @@ public class CommandManager {
         return (context, builder) -> {
             MinecraftClient client = MinecraftClient.getInstance();
             if (client.getNetworkHandler() == null) {
-                return builder.buildFuture(); // Pas connecté
+                return builder.buildFuture();
             }
 
             Collection<PlayerListEntry> players = client.getNetworkHandler().getPlayerList();
