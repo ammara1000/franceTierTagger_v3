@@ -18,6 +18,9 @@
 	"entrypoints": {
 		"client": [
 			"nerd.amara.Francetiers_tagger"
+		],
+		"modmenu": [
+			"nerd.amara.ModMenuIntegration"
 		]
 	},
 	"mixins": [
@@ -27,7 +30,8 @@
 		"fabricloader": ">=0.15.1",
 		"minecraft": "~1.21.4",
 		"java": ">=21",
-		"fabric-api": "*"
+		"fabric-api": "*",
+		"cloth-config": "*"
 	},
 	"suggests": {
 		"another-mod": "*"

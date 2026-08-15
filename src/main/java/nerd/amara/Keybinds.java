@@ -18,19 +18,6 @@ import java.util.List;
 
 public class Keybinds {
     private static KeyBinding change_gamemode;
-    static List<String> gamemodes = List.of(
-            "All",
-            "Crystal",
-            "Sword",
-            "UHC",
-            "Pot",
-            "NethPot",
-            "SMP",
-            "Axe",
-            "DiaSMP",
-            "Mace",
-            "Mod Off"
-    );
     public static void registerKeybinds(){
         change_gamemode=KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.mod.change_gamemode",
@@ -40,17 +27,13 @@ public class Keybinds {
         ));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (change_gamemode.wasPressed()){
-                ModConfig config = ConfigManager.getConfig();
-                String actual_gamemode=config.gamemode;
-                Integer index = gamemodes.indexOf(actual_gamemode);
-                index++;
-                if (index > 10){
-                    index=0;
-                }
-                String new_gamemode=gamemodes.get(index);
-                config.gamemode=new_gamemode;
-                ConfigManager.save();
-                MinecraftClient.getInstance().player.sendMessage(Text.literal("Gamemode Selected: ").append(Text.literal(new_gamemode).styled(s->s.withColor(Formatting.AQUA))),true);
+                me.shedaniel.autoconfig.ConfigHolder<ModConfig> holder = me.shedaniel.autoconfig.AutoConfig.getConfigHolder(ModConfig.class);
+                ModConfig config = holder.getConfig();
+                ModConfig.Gamemode[] values = ModConfig.Gamemode.values();
+                int nextIndex = (config.gamemode.ordinal() + 1) % values.length;
+                config.gamemode = values[nextIndex];
+                holder.save();
+                MinecraftClient.getInstance().player.sendMessage(Text.literal("Gamemode Selected: ").append(Text.literal(config.gamemode.getDisplayName()).styled(s->s.withColor(Formatting.AQUA))),true);
                 ClientWorld world = MinecraftClient.getInstance().world;
 
                 if (world != null) {
