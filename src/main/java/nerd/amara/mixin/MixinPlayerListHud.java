@@ -36,8 +36,9 @@ public class MixinPlayerListHud {
         if (cached != null && cached.result == PlayerInfoCache.Result.FOUND) {
             String suffix = ShowedTier.showed_tier(cached.info);
             if (suffix != null && !suffix.isEmpty()) {
-                net.minecraft.text.MutableText nameText = original != null ? original.copy() : Text.literal(pseudo);
-                return nameText.append(Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT)));
+                net.minecraft.text.MutableText nameText = net.minecraft.text.Text.empty().append(original != null ? original : net.minecraft.text.Text.literal(pseudo));
+                nameText.append(net.minecraft.text.Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT)));
+                return nameText;
             }
         }
         
