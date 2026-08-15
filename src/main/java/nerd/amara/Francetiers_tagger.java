@@ -17,7 +17,7 @@ public class Francetiers_tagger implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		Keybinds.registerKeybinds();
-		ConfigManager.load();
+		me.shedaniel.autoconfig.AutoConfig.register(ModConfig.class, me.shedaniel.autoconfig.serializer.GsonConfigSerializer::new);
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
 			CommandManager.registerCommands(dispatcher);
 		});

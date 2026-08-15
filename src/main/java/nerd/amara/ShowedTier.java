@@ -70,24 +70,25 @@ public class ShowedTier {
     }
 
     public static String showed_tier(PlayerInfo info){
-        ModConfig config = ConfigManager.getConfig();
-        if (Objects.equals(config.gamemode, "Mod Off")){
+        ModConfig config = me.shedaniel.autoconfig.AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+        if (!config.enabled || config.gamemode == ModConfig.Gamemode.MOD_OFF){
             return "";
         }
         if (info==null){
             return "";
         }
 
-        if (!Objects.equals(config.gamemode, "All")) {
-            if (info.tiers != null && info.tiers.containsKey(config.gamemode)) {
-                Tier specific = info.tiers.get(config.gamemode);
+        if (config.gamemode != ModConfig.Gamemode.ALL) {
+            String targetMode = config.gamemode.getDisplayName();
+            if (info.tiers != null && info.tiers.containsKey(targetMode)) {
+                Tier specific = info.tiers.get(targetMode);
                 if (!Objects.equals(specific.tier, "N/A")) {
                     return formatBadge(specific.tier, specific.category);
                 }
             }
             if (info.retired_tiers != null) {
                 for (Tier element : info.retired_tiers) {
-                    if (Objects.equals(element.category, config.gamemode)) {
+                    if (Objects.equals(element.category, targetMode)) {
                         return formatBadge(element.tier, element.category);
                     }
                 }
@@ -147,7 +148,9 @@ public class ShowedTier {
         else if (imp >= 9 && imp < 13) level = 2;
         else if (imp >= 13) level = 1;
         
-        return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.getOrDefault(tier, "") + getGamemodeChar(category, level);
+        ModConfig config = me.shedaniel.autoconfig.AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+        String gamemodeChar = config.showKitIcon ? getGamemodeChar(category, level) : "";
+        return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.getOrDefault(tier, "") + gamemodeChar;
     }
 
     private static String bestActiveGamemode(Map<String, Tier> tiers) {

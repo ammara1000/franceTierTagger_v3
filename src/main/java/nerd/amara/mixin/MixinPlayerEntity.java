@@ -34,7 +34,7 @@ public abstract class MixinPlayerEntity implements TierModifier {
 
     @ModifyReturnValue(method = "getDisplayName", at = @At("RETURN"))
     public Text lol(Text original) {
-        if (suffix != null) {
+        if (suffix != null && me.shedaniel.autoconfig.AutoConfig.getConfigHolder(nerd.amara.ModConfig.class).getConfig().showInNametag) {
             return original.copy().append(Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT)));
         }
         return original;
