@@ -37,11 +37,13 @@ public class ConfigManager {
     }
 
     public static void save() {
-        try (FileWriter writer = new FileWriter(CONFIG_FILE)) {
-            GSON.toJson(config, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try (FileWriter writer = new FileWriter(CONFIG_FILE)) {
+                GSON.toJson(config, writer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public static ModConfig getConfig() {
