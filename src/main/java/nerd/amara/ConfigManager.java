@@ -2,6 +2,7 @@ package nerd.amara;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.File;
 import java.io.FileReader;
@@ -19,13 +20,18 @@ public class ConfigManager {
         if (CONFIG_FILE.exists()) {
             try (FileReader reader = new FileReader(CONFIG_FILE)) {
                 config = GSON.fromJson(reader, ModConfig.class);
-            } catch (IOException e) {
+            } catch (IOException | JsonSyntaxException e) {
                 e.printStackTrace();
+                config = null;
+            }
+            if (config == null) {
                 config = new ModConfig();
+                config.gamemode = "All";
+                save();
             }
         } else {
             config = new ModConfig();
-            config.gamemode="All";
+            config.gamemode = "All";
             save();
         }
     }
@@ -39,6 +45,9 @@ public class ConfigManager {
     }
 
     public static ModConfig getConfig() {
+        if (config == null) {
+            config = new ModConfig();
+        }
         return config;
     }
 }
