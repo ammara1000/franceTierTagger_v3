@@ -39,7 +39,7 @@
 		{
             "type": "bitmap",
             "file": "frtl:font/tier.png",
-            "ascent": 7,
+            "ascent": 8,
             "height": 8,
             "width": 8,
             "chars": [
