@@ -22,6 +22,20 @@
 				"\uEd05\uEd06\uEd07\uEd08\uEd09"
             ]
         },
+        {
+          "type": "bitmap",
+          "file": "frtl:font/new_gamemode.png",
+          "ascent": 12,
+          "height": 15,
+          "width": 15,
+          "chars": [
+            "\uEc00\uEc01\uEc02\uEc03\uEc04\uEC05\uEC06\uEC07\uEC08",
+            "\uEc10\uEc11\uEc12\uEc13\uEc14\uEC15\uEC16\uEC17\uEC18",
+            "\uEc20\uEc21\uEc22\uEc23\uEc24\uEC25\uEC26\uEC27\uEC28",
+            "\uEc30\uEc31\uEc32\uEc33\uEc34\uEC35\uEC36\uEC37\uEC38",
+            "\uEc40\uEc41\uEc42\uEc43\uEc44\uEC45\uEC46\uEC47\uEC48"
+          ]
+        },
 		{
             "type": "bitmap",
             "file": "frtl:font/tier.png",

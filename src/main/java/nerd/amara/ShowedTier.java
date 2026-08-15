@@ -56,59 +56,59 @@ public class ShowedTier {
             Map.entry("Axe", "\uEF08")
     );
     private static Map<String,String> gamemode_emoji_T5=Map.ofEntries(
-            Map.entry("Mace", "\uEF00"),
-            Map.entry("SMP", "\uEF01"),
-            Map.entry("UHC", "\uEF02"),
-            Map.entry("Pot", "\uEF03"),
-            Map.entry("Crystal", "\uEF04"),
-            Map.entry("Sword", "\uEF05"),
-            Map.entry("DiaSMP", "\uEF06"),
-            Map.entry("NethPot", "\uEF07"),
-            Map.entry("Axe", "\uEF08")
+            Map.entry("Mace", "\uEC00"),
+            Map.entry("SMP", "\uEC01"),
+            Map.entry("UHC", "\uEC02"),
+            Map.entry("Pot", "\uEC03"),
+            Map.entry("Crystal", "\uEC04"),
+            Map.entry("Sword", "\uEC05"),
+            Map.entry("DiaSMP", "\uEC06"),
+            Map.entry("NethPot", "\uEC07"),
+            Map.entry("Axe", "\uEC08")
     );
     private static Map<String,String> gamemode_emoji_T4=Map.ofEntries(
-            Map.entry("Mace", "\uEF00"),
-            Map.entry("SMP", "\uEF01"),
-            Map.entry("UHC", "\uEF02"),
-            Map.entry("Pot", "\uEF03"),
-            Map.entry("Crystal", "\uEF04"),
-            Map.entry("Sword", "\uEF05"),
-            Map.entry("DiaSMP", "\uEF06"),
-            Map.entry("NethPot", "\uEF07"),
-            Map.entry("Axe", "\uEF08")
+            Map.entry("Mace", "\uEC10"),
+            Map.entry("SMP", "\uEC11"),
+            Map.entry("UHC", "\uEC12"),
+            Map.entry("Pot", "\uEC13"),
+            Map.entry("Crystal", "\uEC14"),
+            Map.entry("Sword", "\uEC15"),
+            Map.entry("DiaSMP", "\uEC16"),
+            Map.entry("NethPot", "\uEC17"),
+            Map.entry("Axe", "\uEC18")
     );
     private static Map<String,String> gamemode_emoji_T3=Map.ofEntries(
-            Map.entry("Mace", "\uEF00"),
-            Map.entry("SMP", "\uEF01"),
-            Map.entry("UHC", "\uEF02"),
-            Map.entry("Pot", "\uEF03"),
-            Map.entry("Crystal", "\uEF04"),
-            Map.entry("Sword", "\uEF05"),
-            Map.entry("DiaSMP", "\uEF06"),
-            Map.entry("NethPot", "\uEF07"),
-            Map.entry("Axe", "\uEF08")
+            Map.entry("Mace", "\uEC20"),
+            Map.entry("SMP", "\uEC21"),
+            Map.entry("UHC", "\uEC22"),
+            Map.entry("Pot", "\uEC23"),
+            Map.entry("Crystal", "\uEC24"),
+            Map.entry("Sword", "\uEC25"),
+            Map.entry("DiaSMP", "\uEC26"),
+            Map.entry("NethPot", "\uEC27"),
+            Map.entry("Axe", "\uEC28")
     );
     private static Map<String,String> gamemode_emoji_T2=Map.ofEntries(
-            Map.entry("Mace", "\uEF00"),
-            Map.entry("SMP", "\uEF01"),
-            Map.entry("UHC", "\uEF02"),
-            Map.entry("Pot", "\uEF03"),
-            Map.entry("Crystal", "\uEF04"),
-            Map.entry("Sword", "\uEF05"),
-            Map.entry("DiaSMP", "\uEF06"),
-            Map.entry("NethPot", "\uEF07"),
-            Map.entry("Axe", "\uEF08")
+            Map.entry("Mace", "\uEC30"),
+            Map.entry("SMP", "\uEC31"),
+            Map.entry("UHC", "\uEC32"),
+            Map.entry("Pot", "\uEC33"),
+            Map.entry("Crystal", "\uEC34"),
+            Map.entry("Sword", "\uEC35"),
+            Map.entry("DiaSMP", "\uEC36"),
+            Map.entry("NethPot", "\uEC37"),
+            Map.entry("Axe", "\uEC38")
     );
     private static Map<String,String> gamemode_emoji_T1=Map.ofEntries(
-            Map.entry("Mace", "\uEF00"),
-            Map.entry("SMP", "\uEF01"),
-            Map.entry("UHC", "\uEF02"),
-            Map.entry("Pot", "\uEF03"),
-            Map.entry("Crystal", "\uEF04"),
-            Map.entry("Sword", "\uEF05"),
-            Map.entry("DiaSMP", "\uEF06"),
-            Map.entry("NethPot", "\uEF07"),
-            Map.entry("Axe", "\uEF08")
+            Map.entry("Mace", "\uEC40"),
+            Map.entry("SMP", "\uEC41"),
+            Map.entry("UHC", "\uEC42"),
+            Map.entry("Pot", "\uEC43"),
+            Map.entry("Crystal", "\uEC44"),
+            Map.entry("Sword", "\uEC45"),
+            Map.entry("DiaSMP", "\uEC46"),
+            Map.entry("NethPot", "\uEC47"),
+            Map.entry("Axe", "\uEC48")
     );
 
     public static String showed_tier(PlayerInfo info){
