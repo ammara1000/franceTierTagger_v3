@@ -1,6 +1,7 @@
 package nerd.amara;
 
 import nerd.amara.tiers.PlayerInfo;
+import net.minecraft.client.MinecraftClient;
 
 import java.util.Map;
 import java.util.Set;
@@ -42,13 +43,13 @@ public class RequestManager {
                 Http.HttpResult<PlayerInfo> result = Http.getJson(Francetiers_tagger.web_url + pseudo, PlayerInfo.class);
                 if (result.status == Http.Status.OK && result.data != null) {
                     PlayerInfoCache.putFound(pseudo, result.data);
-                    onSuccess.accept(result.data);
+                    MinecraftClient.getInstance().execute(() -> onSuccess.accept(result.data));
                 } else {
                     if (result.status == Http.Status.NOT_FOUND) {
                         PlayerInfoCache.putNotFound(pseudo);
                     }
                     if (onError != null) {
-                        onError.accept(result.status);
+                        MinecraftClient.getInstance().execute(() -> onError.accept(result.status));
                     }
                 }
             } finally {
