@@ -22,42 +22,56 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 public class CommandManager {
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(literal("francetiers")
+                .executes(context -> {
+                    handleShowTier(ownName());
+                    return 1;
+                })
                 .then(argument("name", StringArgumentType.word())
                         .suggests(playerNameSuggester())
                         .executes(context -> {
-                            String name = StringArgumentType.getString(context, "name");
-                            if (name == null || name.isBlank()) {
-                                sendSimpleError("Merci d'indiquer un pseudo, ex: /francetiers <pseudo>");
-                                return 1;
-                            }
-
-                            RequestManager.fetchPlayerInfo(name,
-                                    CommandManager::sendTierMessage,
-                                    (Http.Status status) -> sendTwoTone("Erreur (" + name + "): ", Formatting.RED, describeError(status)));
-
+                            handleShowTier(StringArgumentType.getString(context, "name"));
                             return 1;
                         }))
                 .then(literal("refresh")
+                        .executes(context -> {
+                            handleRefresh(ownName());
+                            return 1;
+                        })
                         .then(argument("name", StringArgumentType.word())
                                 .suggests(playerNameSuggester())
                                 .executes(context -> {
-                                    String name = StringArgumentType.getString(context, "name");
-                                    if (name == null || name.isBlank()) {
-                                        sendSimpleError("Merci d'indiquer un pseudo, ex: /francetiers refresh <pseudo>");
-                                        return 1;
-                                    }
-
-                                    RequestManager.forcePlayerInfoRefresh(name,
-                                            (PlayerInfo info) -> {
-                                                sendTwoTone("Tier actualisé pour ", Formatting.GREEN, name);
-                                                sendTierMessage(info);
-                                            },
-                                            (Http.Status status) -> sendTwoTone("Erreur (" + name + "): ", Formatting.RED, describeError(status)),
-                                            (Long remainingSeconds) -> sendTwoTone("Attends encore " + remainingSeconds + "s avant de réactualiser ", Formatting.YELLOW, name));
-
+                                    handleRefresh(StringArgumentType.getString(context, "name"));
                                     return 1;
                                 })))
         );
+    }
+
+    private static String ownName() {
+        return MinecraftClient.getInstance().player.getName().getString();
+    }
+
+    private static void handleShowTier(String name) {
+        if (name == null || name.isBlank()) {
+            sendSimpleError("Merci d'indiquer un pseudo, ex: /francetiers <pseudo>");
+            return;
+        }
+        RequestManager.fetchPlayerInfo(name,
+                CommandManager::sendTierMessage,
+                (Http.Status status) -> sendTwoTone("Erreur (" + name + "): ", Formatting.RED, describeError(status)));
+    }
+
+    private static void handleRefresh(String name) {
+        if (name == null || name.isBlank()) {
+            sendSimpleError("Merci d'indiquer un pseudo, ex: /francetiers refresh <pseudo>");
+            return;
+        }
+        RequestManager.forcePlayerInfoRefresh(name,
+                (PlayerInfo info) -> {
+                    sendTwoTone("Tier actualisé pour ", Formatting.GREEN, name);
+                    sendTierMessage(info);
+                },
+                (Http.Status status) -> sendTwoTone("Erreur (" + name + "): ", Formatting.RED, describeError(status)),
+                (Long remainingSeconds) -> sendTwoTone("Attends encore " + remainingSeconds + "s avant de réactualiser ", Formatting.YELLOW, name));
     }
 
     private static void sendMessage(Text text) {
