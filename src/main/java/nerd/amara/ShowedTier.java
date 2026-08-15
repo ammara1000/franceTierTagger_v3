@@ -71,15 +71,20 @@ public class ShowedTier {
 
     public static String showed_tier(PlayerInfo info){
         ModConfig config = me.shedaniel.autoconfig.AutoConfig.getConfigHolder(ModConfig.class).getConfig();
-        if (!config.enabled || config.gamemode == ModConfig.Gamemode.MOD_OFF){
+        ModConfig.Gamemode currentMode = config.gamemode;
+        if (currentMode == null) {
+            currentMode = ModConfig.Gamemode.ALL;
+            config.gamemode = currentMode;
+        }
+        if (!config.enabled || currentMode == ModConfig.Gamemode.MOD_OFF){
             return "";
         }
         if (info==null){
             return "";
         }
 
-        if (config.gamemode != ModConfig.Gamemode.ALL) {
-            String targetMode = config.gamemode.getDisplayName();
+        if (currentMode != ModConfig.Gamemode.ALL) {
+            String targetMode = currentMode.getDisplayName();
             if (info.tiers != null && info.tiers.containsKey(targetMode)) {
                 Tier specific = info.tiers.get(targetMode);
                 if (!Objects.equals(specific.tier, "N/A")) {
