@@ -11,6 +11,7 @@ import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import me.shedaniel.autoconfig.AutoConfig;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,12 +27,17 @@ public class CommandManager {
                     handleShowTier(ownName());
                     return 1;
                 })
-                .then(argument("name", StringArgumentType.word())
-                        .suggests(playerNameSuggester())
+                .then(literal("show")
                         .executes(context -> {
-                            handleShowTier(StringArgumentType.getString(context, "name"));
+                            handleShowTier(ownName());
                             return 1;
-                        }))
+                        })
+                        .then(argument("name", StringArgumentType.word())
+                                .suggests(playerNameSuggester())
+                                .executes(context -> {
+                                    handleShowTier(StringArgumentType.getString(context, "name"));
+                                    return 1;
+                                })))
                 .then(literal("refresh")
                         .executes(context -> {
                             handleRefresh(ownName());
@@ -43,6 +49,13 @@ public class CommandManager {
                                     handleRefresh(StringArgumentType.getString(context, "name"));
                                     return 1;
                                 })))
+                .then(literal("config")
+                        .executes(context -> {
+                            MinecraftClient.getInstance().execute(() -> {
+                                MinecraftClient.getInstance().setScreen(AutoConfig.getConfigScreen(ModConfig.class, MinecraftClient.getInstance().currentScreen).get());
+                            });
+                            return 1;
+                        }))
         );
     }
 
@@ -52,7 +65,7 @@ public class CommandManager {
 
     private static void handleShowTier(String name) {
         if (name == null || name.isBlank()) {
-            sendSimpleError("Merci d'indiquer un pseudo, ex: /francetiers <pseudo>");
+            sendSimpleError("Merci d'indiquer un pseudo, ex: /francetiers show <pseudo>");
             return;
         }
         RequestManager.fetchPlayerInfo(name,
