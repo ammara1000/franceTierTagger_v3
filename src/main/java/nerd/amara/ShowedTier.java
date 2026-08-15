@@ -55,6 +55,61 @@ public class ShowedTier {
             Map.entry("NethPot", "\uEF07"),
             Map.entry("Axe", "\uEF08")
     );
+    private static Map<String,String> gamemode_emoji_T5=Map.ofEntries(
+            Map.entry("Mace", "\uEF00"),
+            Map.entry("SMP", "\uEF01"),
+            Map.entry("UHC", "\uEF02"),
+            Map.entry("Pot", "\uEF03"),
+            Map.entry("Crystal", "\uEF04"),
+            Map.entry("Sword", "\uEF05"),
+            Map.entry("DiaSMP", "\uEF06"),
+            Map.entry("NethPot", "\uEF07"),
+            Map.entry("Axe", "\uEF08")
+    );
+    private static Map<String,String> gamemode_emoji_T4=Map.ofEntries(
+            Map.entry("Mace", "\uEF00"),
+            Map.entry("SMP", "\uEF01"),
+            Map.entry("UHC", "\uEF02"),
+            Map.entry("Pot", "\uEF03"),
+            Map.entry("Crystal", "\uEF04"),
+            Map.entry("Sword", "\uEF05"),
+            Map.entry("DiaSMP", "\uEF06"),
+            Map.entry("NethPot", "\uEF07"),
+            Map.entry("Axe", "\uEF08")
+    );
+    private static Map<String,String> gamemode_emoji_T3=Map.ofEntries(
+            Map.entry("Mace", "\uEF00"),
+            Map.entry("SMP", "\uEF01"),
+            Map.entry("UHC", "\uEF02"),
+            Map.entry("Pot", "\uEF03"),
+            Map.entry("Crystal", "\uEF04"),
+            Map.entry("Sword", "\uEF05"),
+            Map.entry("DiaSMP", "\uEF06"),
+            Map.entry("NethPot", "\uEF07"),
+            Map.entry("Axe", "\uEF08")
+    );
+    private static Map<String,String> gamemode_emoji_T2=Map.ofEntries(
+            Map.entry("Mace", "\uEF00"),
+            Map.entry("SMP", "\uEF01"),
+            Map.entry("UHC", "\uEF02"),
+            Map.entry("Pot", "\uEF03"),
+            Map.entry("Crystal", "\uEF04"),
+            Map.entry("Sword", "\uEF05"),
+            Map.entry("DiaSMP", "\uEF06"),
+            Map.entry("NethPot", "\uEF07"),
+            Map.entry("Axe", "\uEF08")
+    );
+    private static Map<String,String> gamemode_emoji_T1=Map.ofEntries(
+            Map.entry("Mace", "\uEF00"),
+            Map.entry("SMP", "\uEF01"),
+            Map.entry("UHC", "\uEF02"),
+            Map.entry("Pot", "\uEF03"),
+            Map.entry("Crystal", "\uEF04"),
+            Map.entry("Sword", "\uEF05"),
+            Map.entry("DiaSMP", "\uEF06"),
+            Map.entry("NethPot", "\uEF07"),
+            Map.entry("Axe", "\uEF08")
+    );
 
     public static String showed_tier(PlayerInfo info){
         ModConfig config = ConfigManager.getConfig();
@@ -114,7 +169,8 @@ public class ShowedTier {
         for (String key : info.tiers.keySet()) {
             Tier value = info.tiers.get(key);
             if (!Objects.equals(value.tier, "N/A")){
-                msg=msg+"\n      "+tiers_emoji.get( value.tier )+" "+gamemode_emoji.get( key )+" "+key;
+                //msg=msg+"\n      "+tiers_emoji.get( value.tier )+" "+gamemode_emoji.get( key )+" "+key;
+                msg=msg+"\n      "+formatBadge(value.tier,key)+" "+key;
                 hasTier=true;
             }
         }
@@ -124,7 +180,22 @@ public class ShowedTier {
         return msg;
     }
 
-    private static String formatBadge(String tier, String category) {
+    private static String formatBadge(String tier, String category) {//il va y avoir un nouveau systeme ou le logo evolue en fonction du tier
+        if (0 <= importance.get(tier) && importance.get(tier) < 5){
+            return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.get(tier) + "" + gamemode_emoji_T5.get(category);
+        }
+        if (5 <= importance.get(tier) && importance.get(tier) < 7){
+            return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.get(tier) + "" + gamemode_emoji_T4.get(category);
+        }
+        if (7 <= importance.get(tier) && importance.get(tier) < 9){
+            return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.get(tier) + "" + gamemode_emoji_T3.get(category);
+        }
+        if (9 <= importance.get(tier) && importance.get(tier) < 13){
+            return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.get(tier) + "" + gamemode_emoji_T2.get(category);
+        }
+        if (13 <= importance.get(tier) && importance.get(tier) < 999){
+            return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.get(tier) + "" + gamemode_emoji_T1.get(category);
+        }
         return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.get(tier) + "" + gamemode_emoji.get(category);
     }
 
