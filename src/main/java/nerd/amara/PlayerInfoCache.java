@@ -6,14 +6,28 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class PlayerInfoCache {
-    private static final long TTL_MILLIS = 5 * 60 * 1000; // 5 min
+    private static final long TTL_MILLIS = 5 * 60 * 1000;
     private static final int MAX_ENTRIES = 150;
 
-    private static class Entry {
-        final PlayerInfo info;
-        final long timestamp;
-        Entry(PlayerInfo info, long timestamp) {
+    public enum Result {
+        FOUND,
+        NOT_FOUND
+    }
+
+    public static class CachedEntry {
+        public final Result result;
+        public final PlayerInfo info;
+        private CachedEntry(Result result, PlayerInfo info) {
+            this.result = result;
             this.info = info;
+        }
+    }
+
+    private static class Entry {
+        final CachedEntry cachedEntry;
+        final long timestamp;
+        Entry(CachedEntry cachedEntry, long timestamp) {
+            this.cachedEntry = cachedEntry;
             this.timestamp = timestamp;
         }
     }
@@ -25,7 +39,7 @@ public class PlayerInfoCache {
         }
     };
 
-    public static synchronized PlayerInfo get(String pseudo) {
+    public static synchronized CachedEntry get(String pseudo) {
         Entry entry = cache.get(pseudo);
         if (entry == null) {
             return null;
@@ -34,10 +48,18 @@ public class PlayerInfoCache {
             cache.remove(pseudo);
             return null;
         }
-        return entry.info;
+        return entry.cachedEntry;
     }
 
-    public static synchronized void put(String pseudo, PlayerInfo info) {
-        cache.put(pseudo, new Entry(info, System.currentTimeMillis()));
+    public static synchronized void putFound(String pseudo, PlayerInfo info) {
+        cache.put(pseudo, new Entry(new CachedEntry(Result.FOUND, info), System.currentTimeMillis()));
+    }
+
+    public static synchronized void putNotFound(String pseudo) {
+        cache.put(pseudo, new Entry(new CachedEntry(Result.NOT_FOUND, null), System.currentTimeMillis()));
+    }
+
+    public static synchronized void invalidate(String pseudo) {
+        cache.remove(pseudo);
     }
 }
