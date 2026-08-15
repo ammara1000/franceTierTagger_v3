@@ -28,7 +28,13 @@ public class Francetiers_tagger implements ClientModInitializer {
 					String pseudo = entity.getName().getString();
 					RequestManager.fetchPlayerInfo(pseudo,
 							(PlayerInfo info) -> ((TierModifier) entity).setSuffix(ShowedTier.showed_tier(info)),
-							(Http.Status status) -> LOGGER.warn("Impossible de récupérer le tier de {} ({})", pseudo, status));
+							(Http.Status status) -> {
+								if (status == Http.Status.NOT_FOUND) {
+									LOGGER.debug("{} n'est pas classé sur FranceTiers", pseudo);
+								} else {
+									LOGGER.warn("Impossible de récupérer le tier de {} ({})", pseudo, status);
+								}
+							});
 				}
 			}
 		}));
