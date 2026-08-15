@@ -25,9 +25,9 @@
         {
           "type": "bitmap",
           "file": "frtl:font/new_gamemode.png",
-          "ascent": 12,
-          "height": 15,
-          "width": 15,
+          "ascent": 8,
+          "height": 9,
+          "width": 9,
           "chars": [
             "\uEc00\uEc01\uEc02\uEc03\uEc04\uEC05\uEC06\uEC07\uEC08",
             "\uEc10\uEc11\uEc12\uEc13\uEc14\uEC15\uEC16\uEC17\uEC18",
@@ -39,9 +39,9 @@
 		{
             "type": "bitmap",
             "file": "frtl:font/tier.png",
-            "ascent": 8,
-            "height": 10,
-            "width": 10,
+            "ascent": 7,
+            "height": 8,
+            "width": 8,
             "chars": [
                 "\uEE00\uEE01\uEE02\uEE03\uEE04\uEE05\uEE06",
 				"\uEE07\uEE08\uEE09\uEE0a\uEE0b\uEE0c\uEE0d"
