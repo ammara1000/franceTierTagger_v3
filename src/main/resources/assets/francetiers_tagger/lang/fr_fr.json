@@ -1,4 +1,11 @@
 {
   "key.mod.change_gamemode": "changer le gamemode affiché",
-  "key.category.minecraft.francetierstagger": "FranceTiers Tagger"
+  "key.category.minecraft.francetierstagger": "FranceTiers Tagger",
+  "text.autoconfig.francetiers_tagger.category.general": "général",
+  "text.autoconfig.francetiers_tagger.category.display": "affichage",
+  "text.autoconfig.francetiers_tagger.option.enabled": "activer FranceTiers Tagger",
+  "text.autoconfig.francetiers_tagger.option.gamemode": "mode de jeu",
+  "text.autoconfig.francetiers_tagger.option.showInNametag": "afficher le tier dans les nametag",
+  "text.autoconfig.francetiers_tagger.option.showInTabList": "afficher le tier dans le tab",
+  "text.autoconfig.francetiers_tagger.option.showKitIcon": "afficher l'icon de kit"
 }
