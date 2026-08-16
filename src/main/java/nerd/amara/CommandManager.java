@@ -101,7 +101,12 @@ public class CommandManager {
     }
 
     private static void sendTierMessage(PlayerInfo info) {
-        sendMessage(Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new StyleSpriteSource.Font(Identifier.of("frtl", "lol")))));
+        if (AutoConfig.getConfigHolder(ModConfig.class).getConfig().smallIcons){
+            sendMessage(Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new StyleSpriteSource.Font(Identifier.of("frtl", "lol_small")))));
+        }
+        else {
+            sendMessage(Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new StyleSpriteSource.Font(Identifier.of("frtl", "lol")))));
+        }
     }
 
     private static String describeError(Http.Status status) {

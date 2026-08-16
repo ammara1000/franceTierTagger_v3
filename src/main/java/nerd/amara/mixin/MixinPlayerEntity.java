@@ -1,6 +1,8 @@
 package nerd.amara.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import me.shedaniel.autoconfig.AutoConfig;
+import nerd.amara.ModConfig;
 import nerd.amara.TierModifier;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -19,6 +21,8 @@ public abstract class MixinPlayerEntity implements TierModifier {
 
     @Unique
     private static final StyleSpriteSource.Font FRTL_FONT = new StyleSpriteSource.Font(Identifier.of("frtl", "lol"));
+    @Unique
+    private static final StyleSpriteSource.Font SMALL_FRTL_FONT = new StyleSpriteSource.Font(Identifier.of("frtl", "lol_small"));
 
     private String suffix = null;
 
@@ -35,7 +39,12 @@ public abstract class MixinPlayerEntity implements TierModifier {
     @ModifyReturnValue(method = "getDisplayName", at = @At("RETURN"))
     public Text lol(Text original) {
         if (suffix != null && me.shedaniel.autoconfig.AutoConfig.getConfigHolder(nerd.amara.ModConfig.class).getConfig().showInNametag) {
-            return original.copy().append(Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT)));
+            if (AutoConfig.getConfigHolder(ModConfig.class).getConfig().smallIcons){
+                return original.copy().append(Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(SMALL_FRTL_FONT)));
+            }
+            else {
+                return original.copy().append(Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT)));
+            }
         }
         return original;
     }

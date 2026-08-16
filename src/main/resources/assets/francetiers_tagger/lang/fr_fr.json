@@ -7,5 +7,6 @@
   "text.autoconfig.francetiers_tagger.option.gamemode": "mode de jeu",
   "text.autoconfig.francetiers_tagger.option.showInNametag": "afficher le tier dans les nametag",
   "text.autoconfig.francetiers_tagger.option.showInTabList": "afficher le tier dans le tab",
-  "text.autoconfig.francetiers_tagger.option.showKitIcon": "afficher l'icon de kit"
+  "text.autoconfig.francetiers_tagger.option.showKitIcon": "afficher l'icone de kit",
+  "text.autoconfig.francetiers_tagger.option.smallIcons": "icones reduites"
 }
