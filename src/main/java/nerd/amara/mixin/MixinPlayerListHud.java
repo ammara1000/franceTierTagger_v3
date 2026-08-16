@@ -1,6 +1,7 @@
 package nerd.amara.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import me.shedaniel.autoconfig.AutoConfig;
 import nerd.amara.ModConfig;
 import nerd.amara.RequestManager;
 import nerd.amara.ShowedTier;
@@ -19,6 +20,8 @@ import org.spongepowered.asm.mixin.injection.At;
 public class MixinPlayerListHud {
     @Unique
     private static final StyleSpriteSource.Font FRTL_FONT = new StyleSpriteSource.Font(Identifier.of("frtl", "lol"));
+    @Unique
+    private static final StyleSpriteSource.Font SMALL_FRTL_FONT = new StyleSpriteSource.Font(Identifier.of("frtl", "lol_small"));
 
     @ModifyReturnValue(method = "getPlayerName", at = @At("RETURN"))
     public Text modifyPlayerName(Text original, PlayerListEntry entry) {
@@ -37,7 +40,12 @@ public class MixinPlayerListHud {
             String suffix = ShowedTier.showed_tier(cached.info);
             if (suffix != null && !suffix.isEmpty()) {
                 net.minecraft.text.MutableText nameText = net.minecraft.text.Text.empty().append(original != null ? original : net.minecraft.text.Text.literal(pseudo));
-                nameText.append(net.minecraft.text.Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT)));
+                if (AutoConfig.getConfigHolder(ModConfig.class).getConfig().smallIcons){
+                    nameText.append(net.minecraft.text.Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(SMALL_FRTL_FONT)));
+                }
+                else {
+                    nameText.append(net.minecraft.text.Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT)));
+                }
                 return nameText;
             }
         }
