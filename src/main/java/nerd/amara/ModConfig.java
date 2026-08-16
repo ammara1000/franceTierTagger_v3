@@ -23,6 +23,9 @@ public class ModConfig implements ConfigData {
     @ConfigEntry.Category("display")
     public boolean showKitIcon = true;
 
+    @ConfigEntry.Category("display")
+    public boolean smallIcons = false;
+
     public enum Gamemode {
         ALL("All"),
         CRYSTAL("Crystal"),

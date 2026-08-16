@@ -18,6 +18,8 @@
   "text.autoconfig.francetiers_tagger.option.gamemode.MACE": "Mace",
   "text.autoconfig.francetiers_tagger.option.gamemode.MOD_OFF": "Mod Off",
   "text.autoconfig.francetiers_tagger.option.showKitIcon": "Show Kit Icon",
+  "text.autoconfig.francetiers_tagger.option.smallIcons": "Small Icons",
   "key.mod.change_gamemode": "Change Gamemode",
-  "key.mod.open_tier_screen": "Show Player Stats"
+  "key.mod.open_tier_screen": "Show Player Stats",
+  "key.category.minecraft.francetierstagger": "FranceTiers Tagger"
 }
