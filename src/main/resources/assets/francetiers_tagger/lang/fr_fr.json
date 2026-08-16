@@ -1,4 +1,23 @@
 {
-  "key.mod.change_gamemode": "changer le gamemode affiché",
-  "key.category.minecraft.francetierstagger": "FranceTiers Tagger"
+  "text.autoconfig.francetiers_tagger.title": "Configuration FranceTiers",
+  "text.autoconfig.francetiers_tagger.category.general": "Général",
+  "text.autoconfig.francetiers_tagger.option.enabled": "Activer le mod",
+  "text.autoconfig.francetiers_tagger.category.display": "Affichage",
+  "text.autoconfig.francetiers_tagger.option.showInNametag": "Afficher au-dessus de la tête",
+  "text.autoconfig.francetiers_tagger.option.showInTabList": "Afficher dans le TAB",
+  "text.autoconfig.francetiers_tagger.option.gamemode": "Mode de Jeu Préféré",
+  "text.autoconfig.francetiers_tagger.option.gamemode.ALL": "Tous",
+  "text.autoconfig.francetiers_tagger.option.gamemode.CRYSTAL": "Crystal",
+  "text.autoconfig.francetiers_tagger.option.gamemode.SWORD": "Sword",
+  "text.autoconfig.francetiers_tagger.option.gamemode.UHC": "UHC",
+  "text.autoconfig.francetiers_tagger.option.gamemode.POT": "Pot",
+  "text.autoconfig.francetiers_tagger.option.gamemode.NETHPOT": "NethPot",
+  "text.autoconfig.francetiers_tagger.option.gamemode.SMP": "SMP",
+  "text.autoconfig.francetiers_tagger.option.gamemode.AXE": "Axe",
+  "text.autoconfig.francetiers_tagger.option.gamemode.DIASMP": "DiaSMP",
+  "text.autoconfig.francetiers_tagger.option.gamemode.MACE": "Mace",
+  "text.autoconfig.francetiers_tagger.option.gamemode.MOD_OFF": "Mod Désactivé",
+  "text.autoconfig.francetiers_tagger.option.showKitIcon": "Afficher l'icône du Kit",
+  "key.mod.change_gamemode": "Changer le Gamemode",
+  "key.mod.open_tier_screen": "Afficher les stats du joueur"
 }

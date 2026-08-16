@@ -7,7 +7,7 @@ import nerd.amara.tiers.PlayerInfo;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.text.StyleSpriteSource;
+
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -69,7 +69,11 @@ public class CommandManager {
             return;
         }
         RequestManager.fetchPlayerInfo(name,
-                CommandManager::sendTierMessage,
+                (PlayerInfo info) -> {
+                    MinecraftClient.getInstance().execute(() -> {
+                        MinecraftClient.getInstance().setScreen(new TierScreen(info));
+                    });
+                },
                 (Http.Status status) -> sendTwoTone("Erreur (" + name + "): ", Formatting.RED, describeError(status)));
     }
 
@@ -81,7 +85,9 @@ public class CommandManager {
         RequestManager.forcePlayerInfoRefresh(name,
                 (PlayerInfo info) -> {
                     sendTwoTone("Tier actualisé pour ", Formatting.GREEN, name);
-                    sendTierMessage(info);
+                    MinecraftClient.getInstance().execute(() -> {
+                        MinecraftClient.getInstance().setScreen(new TierScreen(info));
+                    });
                 },
                 (Http.Status status) -> sendTwoTone("Erreur (" + name + "): ", Formatting.RED, describeError(status)),
                 (Long remainingSeconds) -> sendTwoTone("Attends encore " + remainingSeconds + "s avant de réactualiser ", Formatting.YELLOW, name));
@@ -101,7 +107,7 @@ public class CommandManager {
     }
 
     private static void sendTierMessage(PlayerInfo info) {
-        sendMessage(Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new StyleSpriteSource.Font(Identifier.of("frtl", "lol")))));
+        sendMessage(Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol")))));
     }
 
     private static String describeError(Http.Status status) {

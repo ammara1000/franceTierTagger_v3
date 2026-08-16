@@ -18,12 +18,21 @@ import java.util.List;
 
 public class Keybinds {
     private static KeyBinding change_gamemode;
+    private static KeyBinding open_tier_screen;
     public static void registerKeybinds(){
+        KeyBinding.Category category = KeyBinding.Category.create(Identifier.of("francetierstagger"));
+        
         change_gamemode=KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.mod.change_gamemode",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_UNKNOWN,
-                KeyBinding.Category.create(Identifier.of("francetierstagger"))
+                category
+        ));
+        open_tier_screen=KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.mod.open_tier_screen",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_K,
+                category
         ));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (change_gamemode.wasPressed()){
@@ -42,6 +51,30 @@ public class Keybinds {
                         RequestManager.fetchPlayerInfo(pseudo,
                                 (PlayerInfo info) -> ((TierModifier) player).setSuffix(ShowedTier.showed_tier(info)),
                                 null);
+                    }
+                }
+            }
+
+            while (open_tier_screen.wasPressed()) {
+                ClientWorld world = MinecraftClient.getInstance().world;
+                if (world != null && MinecraftClient.getInstance().player != null) {
+                    AbstractClientPlayerEntity closestPlayer = null;
+                    double closestDistance = 50.0 * 50.0;
+                    for (AbstractClientPlayerEntity player : world.getPlayers()) {
+                        if (player == MinecraftClient.getInstance().player) continue;
+                        double distance = player.squaredDistanceTo(MinecraftClient.getInstance().player);
+                        if (distance < closestDistance) {
+                            closestDistance = distance;
+                            closestPlayer = player;
+                        }
+                    }
+                    if (closestPlayer != null) {
+                        String pseudo = closestPlayer.getName().getString();
+                        RequestManager.fetchPlayerInfo(pseudo, (PlayerInfo info) -> {
+                            MinecraftClient.getInstance().execute(() -> {
+                                MinecraftClient.getInstance().setScreen(new TierScreen(info));
+                            });
+                        }, null);
                     }
                 }
             }
