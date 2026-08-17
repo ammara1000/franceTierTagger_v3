@@ -12,4 +12,5 @@ public class PlayerInfo {
     public List<Tier> retired_tiers;
     public String background_color;
     public String text_color;
+    public String region;
 }

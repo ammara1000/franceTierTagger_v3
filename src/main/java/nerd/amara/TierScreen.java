@@ -23,6 +23,60 @@ public class TierScreen extends Screen {
     private AbstractClientPlayerEntity playerEntity;
     private Identifier playerAvatarId;
     private boolean avatarLoaded = false;
+    
+    private static final java.util.Set<String> REGISTERED_AVATARS = new java.util.HashSet<>();
+    
+    private String getGamemodeIconChar(String tierText, String mode) {
+        if (tierText.equals("-") || tierText.equals("N/A")) return "";
+        
+        int imp = -1;
+        if (tierText.equals("LT6")) imp = 1;
+        else if (tierText.equals("HT6")) imp = 2;
+        else if (tierText.equals("LT5")) imp = 3;
+        else if (tierText.equals("HT5")) imp = 4;
+        else if (tierText.equals("LT4")) imp = 5;
+        else if (tierText.equals("HT4")) imp = 6;
+        else if (tierText.equals("LT3")) imp = 7;
+        else if (tierText.equals("HT3")) imp = 8;
+        else if (tierText.equals("RLT2")) imp = 9;
+        else if (tierText.equals("LT2")) imp = 10;
+        else if (tierText.equals("RHT2")) imp = 11;
+        else if (tierText.equals("HT2")) imp = 12;
+        else if (tierText.equals("RLT1")) imp = 13;
+        else if (tierText.equals("LT1")) imp = 14;
+        else if (tierText.equals("RHT1")) imp = 15;
+        else if (tierText.equals("HT1")) imp = 16;
+        
+        int level = 0;
+        if (imp >= 0 && imp < 5) level = 5;
+        else if (imp >= 5 && imp < 7) level = 4;
+        else if (imp >= 7 && imp < 9) level = 3;
+        else if (imp >= 9 && imp < 13) level = 2;
+        else if (imp >= 13) level = 1;
+        
+        String cleanMode = mode.toLowerCase().replace(" ", "");
+        int offset = -1;
+        if (cleanMode.equals("mace")) offset = 0;
+        else if (cleanMode.equals("smp")) offset = 1;
+        else if (cleanMode.equals("uhc")) offset = 2;
+        else if (cleanMode.equals("pot")) offset = 3;
+        else if (cleanMode.equals("crystal") || cleanMode.equals("vanilla")) offset = 4;
+        else if (cleanMode.equals("sword")) offset = 5;
+        else if (cleanMode.equals("diasmp")) offset = 6;
+        else if (cleanMode.equals("nethpot")) offset = 7;
+        else if (cleanMode.equals("axe")) offset = 8;
+        
+        if (offset == -1) return "";
+        
+        int base = 0xEF00;
+        if (level == 5) base = 0xEC00;
+        else if (level == 4) base = 0xEC10;
+        else if (level == 3) base = 0xEC20;
+        else if (level == 2) base = 0xEC30;
+        else if (level == 1) base = 0xEC40;
+        
+        return String.valueOf((char) (base + offset));
+    }
 
     public TierScreen(PlayerInfo playerInfo) {
         super(Text.literal("Profil de " + playerInfo.pseudo));
@@ -43,12 +97,32 @@ public class TierScreen extends Screen {
                     String urlStr = "https://mc-heads.net/body/" + playerInfo.pseudo;
                     URL url = new java.net.URI(urlStr).toURL();
                     try (InputStream is = url.openStream()) {
-                        NativeImage image = NativeImage.read(is);
-                        MinecraftClient.getInstance().execute(() -> {
-                            this.playerAvatarId = Identifier.of("tier", "avatar_" + playerInfo.pseudo.toLowerCase());
-                            MinecraftClient.getInstance().getTextureManager().registerTexture(this.playerAvatarId, new NativeImageBackedTexture(() -> "avatar_" + playerInfo.pseudo.toLowerCase(), image));
-                            this.avatarLoaded = true;
-                        });
+                        java.awt.image.BufferedImage original = javax.imageio.ImageIO.read(is);
+                        if (original != null) {
+                            java.awt.image.BufferedImage rgbaImage = new java.awt.image.BufferedImage(original.getWidth(), original.getHeight(), java.awt.image.BufferedImage.TYPE_INT_ARGB);
+                            java.awt.Graphics2D g = rgbaImage.createGraphics();
+                            g.drawImage(original, 0, 0, null);
+                            g.dispose();
+
+                            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+                            javax.imageio.ImageIO.write(rgbaImage, "png", baos);
+                            java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(baos.toByteArray());
+                            
+                            NativeImage image = NativeImage.read(bais);
+                            MinecraftClient.getInstance().execute(() -> {
+                                String avatarStr = "avatar_" + playerInfo.pseudo.toLowerCase();
+                                this.playerAvatarId = Identifier.of("tier", avatarStr);
+                                if (!REGISTERED_AVATARS.contains(avatarStr)) {
+                                    NativeImageBackedTexture texture = new NativeImageBackedTexture(() -> avatarStr, image);
+                                    texture.upload();
+                                    MinecraftClient.getInstance().getTextureManager().registerTexture(this.playerAvatarId, texture);
+                                    REGISTERED_AVATARS.add(avatarStr);
+                                } else {
+                                    image.close();
+                                }
+                                this.avatarLoaded = true;
+                            });
+                        }
                     }
                 } catch (Exception ignored) {
                 }
@@ -88,19 +162,48 @@ public class TierScreen extends Screen {
 
         int gridCenterX = this.width / 2;
         if (this.playerEntity != null) {
-            InventoryScreen.drawEntity(context, startX + 50, startY + 160, startX + 50 - mouseX, startY + 160 - 50 - mouseY, 60, 0.0625f, mouseX, mouseY, this.playerEntity);
+            InventoryScreen.drawEntity(context, startX + 10, startY + 10, startX + 90, startY + 190, 60, 0.0625f, mouseX, mouseY, this.playerEntity);
             gridCenterX = startX + 210;
         } else if (this.avatarLoaded && this.playerAvatarId != null) {
-            context.drawTexture(net.minecraft.client.gl.RenderPipelines.GUI_TEXTURED, this.playerAvatarId, startX + 23, startY + 40, 0f, 0f, 54, 120, 108, 240);
+            context.drawTexturedQuad(this.playerAvatarId, startX + 23, startX + 23 + 54, startY + 40, startY + 40 + 120, 0f, 54f / 108f, 0f, 120f / 240f);
             gridCenterX = startX + 210;
         } else {
             gridCenterX = startX + 210;
             context.drawCenteredTextWithShadow(this.textRenderer, "Chargement...", startX + 50, startY + 100, 0xFFAAAAAA);
         }
 
-        context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, startY + 10, 0xFFFFFFFF);
+        String titleText = "Profil de " + playerInfo.pseudo;
+        int titleWidth = this.textRenderer.getWidth(titleText);
         
-        String rankStr = playerInfo.global_rank != null ? "#" + playerInfo.global_rank : "N/A";
+        if (playerInfo.region != null && !playerInfo.region.isEmpty()) {
+            String regionText = playerInfo.region.toUpperCase();
+            int regionWidth = this.textRenderer.getWidth(regionText);
+            int badgeWidth = regionWidth + 8;
+            int badgeHeight = 12;
+            int totalWidth = titleWidth + 4 + badgeWidth;
+            
+            int titleStartX = this.width / 2 - totalWidth / 2;
+            context.drawTextWithShadow(this.textRenderer, titleText, titleStartX, startY + 10, 0xFFFFFFFF);
+            
+            int badgeStartX = titleStartX + titleWidth + 4;
+            int badgeY = startY + 9;
+            
+            int regionColor = 0xFF555555;
+            if (regionText.equals("EU")) regionColor = 0xFF599C4B;
+            else if (regionText.equals("NA")) regionColor = 0xFF9F3A44;
+            else if (regionText.equals("AS")) regionColor = 0xFFE09F3E;
+            else if (regionText.equals("SA")) regionColor = 0xFF3E80E0;
+            else if (regionText.equals("AF")) regionColor = 0xFFA0522D;
+            else if (regionText.equals("OC")) regionColor = 0xFF800080;
+            else if (regionText.equals("ME")) regionColor = 0xFFD4A017;
+            
+            drawRoundedRect(context, badgeStartX, badgeY, badgeWidth, badgeHeight, regionColor);
+            context.drawText(this.textRenderer, regionText, badgeStartX + 4, badgeY + 2, 0xFFFFFFFF, false);
+        } else {
+            context.drawCenteredTextWithShadow(this.textRenderer, titleText, this.width / 2, startY + 10, 0xFFFFFFFF);
+        }
+        
+        String rankStr = playerInfo.global_rank != null ? "#" + playerInfo.global_rank : "-";
         String ptsStr = playerInfo.total_points != null ? playerInfo.total_points : "0";
         
         context.drawTextWithShadow(this.textRenderer, "Global: " + rankStr, startX + 15, startY + windowHeight - 20, 0xFFAAAAAA);
@@ -125,7 +228,7 @@ public class TierScreen extends Screen {
             String mode = modes[i];
             int x = startX + i * spacing;
             
-            String tierText = "N/A";
+            String tierText = "-";
             if (playerInfo.tiers != null) {
                 for (Map.Entry<String, nerd.amara.tiers.Tier> entry : playerInfo.tiers.entrySet()) {
                     String cleanKey = entry.getKey().toLowerCase().replace(" ", "");
@@ -142,12 +245,26 @@ public class TierScreen extends Screen {
             
             context.drawText(this.textRenderer, iconText, x - iconWidth / 2, y, 0xFFFFFFFF, false);
             
+            Text badgeText;
+            if (tierText.equals("-") || tierText.equals("N/A")) {
+                badgeText = Text.literal("-");
+            } else {
+                String iconChar = getGamemodeIconChar(tierText, mode);
+                if (!iconChar.isEmpty()) {
+                    badgeText = Text.empty()
+                        .append(Text.literal(iconChar).setStyle(net.minecraft.text.Style.EMPTY.withFont(new net.minecraft.text.StyleSpriteSource.Font(net.minecraft.util.Identifier.of("frtl", "lol_small")))))
+                        .append(Text.literal(" " + tierText));
+                } else {
+                    badgeText = Text.literal(tierText);
+                }
+            }
+            
             int tierColor = getTierColor(tierText);
-            drawBadge(context, x, y + 16, tierText, tierColor);
+            drawBadge(context, x, y + 16, badgeText, tierColor);
         }
     }
 
-    private void drawBadge(DrawContext context, int centerX, int y, String text, int color) {
+    private void drawBadge(DrawContext context, int centerX, int y, Text text, int color) {
         int textWidth = this.textRenderer.getWidth(text);
         int badgeWidth = Math.max(34, textWidth + 12);
         int badgeHeight = 14;
@@ -198,7 +315,7 @@ public class TierScreen extends Screen {
     }
 
     private int getTierColor(String tier) {
-        if (tier == null || tier.equals("N/A")) return 0xFF555555;
+        if (tier == null || tier.equals("-") || tier.equals("N/A")) return 0xFF1F202A;
         if (tier.startsWith("HT1") || tier.startsWith("RHT1")) return 0xFFFFD700;
         if (tier.startsWith("LT1") || tier.startsWith("RLT1")) return 0xFFFFD700;
         if (tier.startsWith("HT2") || tier.startsWith("RHT2")) return 0xFF3399FF;
