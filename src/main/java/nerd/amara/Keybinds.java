@@ -54,26 +54,19 @@ public class Keybinds {
                     for (AbstractClientPlayerEntity player : world.getPlayers()) {
                         String pseudo = player.getName().getString();
                         RequestManager.fetchPlayerInfo(pseudo,
-                                (PlayerInfo info) -> ((TierModifier) player).setSuffix(ShowedTier.showed_tier(info)),
-                                null);
-                        if (!player.getPassengerList().isEmpty()){
-                            for (Entity i : player.getPassengerList()){
-                                if (i instanceof DisplayEntity.TextDisplayEntity){
-                                    DisplayEntity.TextDisplayEntity textDisplay = (DisplayEntity.TextDisplayEntity) i;
-                                    if (textDisplay.getText().getString().contains(pseudo)){
-                                        RequestManager.fetchPlayerInfo(pseudo,
-                                                (PlayerInfo info) -> setTextInTextDisplay(info,textDisplay, pseudo),
-                                                (Http.Status status) -> {
-                                                    if (status == Http.Status.NOT_FOUND) {
-                                                        Francetiers_tagger.LOGGER.debug("{} n'est pas classé sur FranceTiers", pseudo);
-                                                    } else {
-                                                        Francetiers_tagger.LOGGER.warn("Impossible de récupérer le tier de {} ({})", pseudo, status);
-                                                    }
-                                                });
+                                (PlayerInfo info) -> {
+                                    ((TierModifier) player).setSuffix(ShowedTier.showed_tier(info));
+                                    if (!player.getPassengerList().isEmpty()) {
+                                        for (Entity i : player.getPassengerList()) {
+                                            if (i instanceof DisplayEntity.TextDisplayEntity textDisplay) {
+                                                if (textDisplay.getText().getString().contains(pseudo)) {
+                                                    setTextInTextDisplay(info, textDisplay, pseudo);
+                                                }
+                                            }
+                                        }
                                     }
-                                }
-                            }
-                        }
+                                },
+                                null);
                     }
                 }
             }

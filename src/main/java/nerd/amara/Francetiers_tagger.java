@@ -35,7 +35,16 @@ public class Francetiers_tagger implements ClientModInitializer {
 				if (((TierModifier) entity).getSuffix() == null) {
 					String pseudo = entity.getName().getString();
 					RequestManager.fetchPlayerInfo(pseudo,
-							(PlayerInfo info) -> ((TierModifier) entity).setSuffix(ShowedTier.showed_tier(info)),
+							(PlayerInfo info) -> {
+								((TierModifier) entity).setSuffix(ShowedTier.showed_tier(info));
+								for (Entity passenger : entity.getPassengerList()) {
+									if (passenger instanceof DisplayEntity.TextDisplayEntity textDisplay) {
+										if (textDisplay.getText().getString().contains(pseudo)) {
+											setTextInTextDisplay(info, textDisplay, pseudo);
+										}
+									}
+								}
+							},
 							(Http.Status status) -> {
 								if (status == Http.Status.NOT_FOUND) {
 									LOGGER.debug("{} n'est pas classé sur FranceTiers", pseudo);
@@ -44,30 +53,20 @@ public class Francetiers_tagger implements ClientModInitializer {
 								}
 							});
 				}
-			}
-			if (entity instanceof DisplayEntity.TextDisplayEntity){
-				Box box = entity.getBoundingBox().expand(3.0);
-				for (Entity player : entity.getEntityWorld().getOtherEntities(entity,box)){
-					if (player instanceof PlayerEntity){
-						String pseudo = player.getName().getString();
-						if (!player.getPassengerList().isEmpty()){
-							for (Entity i : player.getPassengerList()){
-								if (i instanceof DisplayEntity.TextDisplayEntity){
-									DisplayEntity.TextDisplayEntity textDisplay = (DisplayEntity.TextDisplayEntity) i;
-									if (textDisplay.getText().getString().contains(pseudo)){
-										RequestManager.fetchPlayerInfo(pseudo,
-												(PlayerInfo info) -> setTextInTextDisplay(info,textDisplay, pseudo),
-												(Http.Status status) -> {
-													if (status == Http.Status.NOT_FOUND) {
-														LOGGER.debug("{} n'est pas classé sur FranceTiers", pseudo);
-													} else {
-														LOGGER.warn("Impossible de récupérer le tier de {} ({})", pseudo, status);
-													}
-												});
+			} else if (entity instanceof DisplayEntity.TextDisplayEntity textDisplay) {
+				Entity vehicle = textDisplay.getVehicle();
+				if (vehicle instanceof PlayerEntity player) {
+					String pseudo = player.getName().getString();
+					if (textDisplay.getText().getString().contains(pseudo)) {
+						RequestManager.fetchPlayerInfo(pseudo,
+								(PlayerInfo info) -> setTextInTextDisplay(info, textDisplay, pseudo),
+								(Http.Status status) -> {
+									if (status == Http.Status.NOT_FOUND) {
+										LOGGER.debug("{} n'est pas classé sur FranceTiers", pseudo);
+									} else {
+										LOGGER.warn("Impossible de récupérer le tier de {} ({})", pseudo, status);
 									}
-								}
-							}
-						}
+								});
 					}
 				}
 			}
