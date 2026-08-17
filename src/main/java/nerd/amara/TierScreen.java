@@ -6,10 +6,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
+
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.Identifier;
 import net.minecraft.text.Text;
 import java.net.URL;
@@ -20,7 +20,7 @@ import java.util.Map;
 public class TierScreen extends Screen {
 
     private final PlayerInfo playerInfo;
-    private AbstractClientPlayerEntity playerEntity;
+
     private Identifier playerAvatarId;
     private boolean avatarLoaded = false;
     
@@ -82,52 +82,41 @@ public class TierScreen extends Screen {
         super(Text.literal("Profil de " + playerInfo.pseudo));
         this.playerInfo = playerInfo;
         
-        if (MinecraftClient.getInstance().world != null) {
-            for (AbstractClientPlayerEntity entity : MinecraftClient.getInstance().world.getPlayers()) {
-                if (entity.getName().getString().equalsIgnoreCase(playerInfo.pseudo)) {
-                    this.playerEntity = entity;
-                    break;
-                }
-            }
-        }
-        
-        if (this.playerEntity == null) {
-            CompletableFuture.runAsync(() -> {
-                try {
-                    String urlStr = "https://mc-heads.net/body/" + playerInfo.pseudo;
-                    URL url = new java.net.URI(urlStr).toURL();
-                    try (InputStream is = url.openStream()) {
-                        java.awt.image.BufferedImage original = javax.imageio.ImageIO.read(is);
-                        if (original != null) {
-                            java.awt.image.BufferedImage rgbaImage = new java.awt.image.BufferedImage(original.getWidth(), original.getHeight(), java.awt.image.BufferedImage.TYPE_INT_ARGB);
-                            java.awt.Graphics2D g = rgbaImage.createGraphics();
-                            g.drawImage(original, 0, 0, null);
-                            g.dispose();
+        CompletableFuture.runAsync(() -> {
+            try {
+                String urlStr = "https://mc-heads.net/body/" + playerInfo.pseudo + "/54";
+                URL url = new java.net.URI(urlStr).toURL();
+                try (InputStream is = url.openStream()) {
+                    java.awt.image.BufferedImage original = javax.imageio.ImageIO.read(is);
+                    if (original != null) {
+                        java.awt.image.BufferedImage rgbaImage = new java.awt.image.BufferedImage(original.getWidth(), original.getHeight(), java.awt.image.BufferedImage.TYPE_INT_ARGB);
+                        java.awt.Graphics2D g = rgbaImage.createGraphics();
+                        g.drawImage(original, 0, 0, null);
+                        g.dispose();
 
-                            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-                            javax.imageio.ImageIO.write(rgbaImage, "png", baos);
-                            java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(baos.toByteArray());
-                            
-                            NativeImage image = NativeImage.read(bais);
-                            MinecraftClient.getInstance().execute(() -> {
-                                String avatarStr = "avatar_" + playerInfo.pseudo.toLowerCase();
-                                this.playerAvatarId = Identifier.of("tier", avatarStr);
-                                if (!REGISTERED_AVATARS.contains(avatarStr)) {
-                                    NativeImageBackedTexture texture = new NativeImageBackedTexture(() -> avatarStr, image);
-                                    texture.upload();
-                                    MinecraftClient.getInstance().getTextureManager().registerTexture(this.playerAvatarId, texture);
-                                    REGISTERED_AVATARS.add(avatarStr);
-                                } else {
-                                    image.close();
-                                }
-                                this.avatarLoaded = true;
-                            });
-                        }
+                        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+                        javax.imageio.ImageIO.write(rgbaImage, "png", baos);
+                        java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(baos.toByteArray());
+                        
+                        NativeImage image = NativeImage.read(bais);
+                        MinecraftClient.getInstance().execute(() -> {
+                            String avatarStr = "avatar_" + playerInfo.pseudo.toLowerCase();
+                            this.playerAvatarId = Identifier.of("tier", avatarStr);
+                            if (!REGISTERED_AVATARS.contains(avatarStr)) {
+                                NativeImageBackedTexture texture = new NativeImageBackedTexture(() -> avatarStr, image);
+                                texture.upload();
+                                MinecraftClient.getInstance().getTextureManager().registerTexture(this.playerAvatarId, texture);
+                                REGISTERED_AVATARS.add(avatarStr);
+                            } else {
+                                image.close();
+                            }
+                            this.avatarLoaded = true;
+                        });
                     }
-                } catch (Exception ignored) {
                 }
-            });
-        }
+            } catch (Exception ignored) {
+            }
+        });
     }
 
     @Override
@@ -160,15 +149,10 @@ public class TierScreen extends Screen {
         int startX = (this.width - windowWidth) / 2;
         int startY = (this.height - windowHeight) / 2;
 
-        int gridCenterX = this.width / 2;
-        if (this.playerEntity != null) {
-            InventoryScreen.drawEntity(context, startX + 10, startY + 10, startX + 90, startY + 190, 60, 0.0625f, mouseX, mouseY, this.playerEntity);
-            gridCenterX = startX + 210;
-        } else if (this.avatarLoaded && this.playerAvatarId != null) {
-            context.drawTexturedQuad(this.playerAvatarId, startX + 23, startX + 23 + 54, startY + 40, startY + 40 + 120, 0f, 54f / 108f, 0f, 120f / 240f);
-            gridCenterX = startX + 210;
+        int gridCenterX = startX + 210;
+        if (this.avatarLoaded && this.playerAvatarId != null) {
+            context.drawTexturedQuad(this.playerAvatarId, startX + 23, startX + 23 + 54, startY + 40, startY + 40 + 120, 0f, 1f, 0f, 1f);
         } else {
-            gridCenterX = startX + 210;
             context.drawCenteredTextWithShadow(this.textRenderer, "Chargement...", startX + 50, startY + 100, 0xFFAAAAAA);
         }
 
@@ -188,14 +172,16 @@ public class TierScreen extends Screen {
             int badgeStartX = titleStartX + titleWidth + 4;
             int badgeY = startY + 9;
             
-            int regionColor = 0xFF555555;
-            if (regionText.equals("EU")) regionColor = 0xFF599C4B;
-            else if (regionText.equals("NA")) regionColor = 0xFF9F3A44;
-            else if (regionText.equals("AS")) regionColor = 0xFFE09F3E;
-            else if (regionText.equals("SA")) regionColor = 0xFF3E80E0;
-            else if (regionText.equals("AF")) regionColor = 0xFFA0522D;
-            else if (regionText.equals("OC")) regionColor = 0xFF800080;
-            else if (regionText.equals("ME")) regionColor = 0xFFD4A017;
+            int regionColor = switch (regionText) {
+                case "EU" -> 0xFF599C4B;
+                case "NA" -> 0xFF9F3A44;
+                case "AS" -> 0xFFE09F3E;
+                case "SA" -> 0xFF3E80E0;
+                case "AF" -> 0xFFA0522D;
+                case "OC" -> 0xFF800080;
+                case "ME" -> 0xFFD4A017;
+                default -> 0xFF555555;
+            };
             
             drawRoundedRect(context, badgeStartX, badgeY, badgeWidth, badgeHeight, regionColor);
             context.drawText(this.textRenderer, regionText, badgeStartX + 4, badgeY + 2, 0xFFFFFFFF, false);

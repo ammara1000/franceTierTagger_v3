@@ -133,7 +133,6 @@ public class ShowedTier {
         for (String key : info.tiers.keySet()) {
             Tier value = info.tiers.get(key);
             if (!Objects.equals(value.tier, "N/A")){
-                //msg=msg+"\n      "+tiers_emoji.get( value.tier )+" "+gamemode_emoji.get( key )+" "+key;
                 msg=msg+"\n      "+formatBadge(value.tier,key)+" "+key;
                 hasTier=true;
             }
