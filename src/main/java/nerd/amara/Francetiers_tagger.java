@@ -1,11 +1,19 @@
 package nerd.amara;
 
+import me.shedaniel.autoconfig.AutoConfig;
 import nerd.amara.tiers.PlayerInfo;
 import net.fabricmc.api.ClientModInitializer;
 
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.text.StyleSpriteSource;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Box;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +45,52 @@ public class Francetiers_tagger implements ClientModInitializer {
 							});
 				}
 			}
+			if (entity instanceof DisplayEntity.TextDisplayEntity){
+				Box box = entity.getBoundingBox().expand(3.0);
+				for (Entity player : entity.getEntityWorld().getOtherEntities(entity,box)){
+					if (player instanceof PlayerEntity){
+						String pseudo = player.getName().getString();
+						if (!player.getPassengerList().isEmpty()){
+							for (Entity i : player.getPassengerList()){
+								if (i instanceof DisplayEntity.TextDisplayEntity){
+									DisplayEntity.TextDisplayEntity textDisplay = (DisplayEntity.TextDisplayEntity) i;
+									if (textDisplay.getText().getString().contains(pseudo)){
+										RequestManager.fetchPlayerInfo(pseudo,
+												(PlayerInfo info) -> setTextInTextDisplay(info,textDisplay, pseudo),
+												(Http.Status status) -> {
+													if (status == Http.Status.NOT_FOUND) {
+														LOGGER.debug("{} n'est pas classé sur FranceTiers", pseudo);
+													} else {
+														LOGGER.warn("Impossible de récupérer le tier de {} ({})", pseudo, status);
+													}
+												});
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		}));
 
 		LOGGER.info("france tiers tagger initialized");
+	}
+
+	private static final StyleSpriteSource.Font FRTL_FONT = new StyleSpriteSource.Font(Identifier.of("frtl", "lol"));
+	private static final StyleSpriteSource.Font SMALL_FRTL_FONT = new StyleSpriteSource.Font(Identifier.of("frtl", "lol_small"));
+
+	public static Text setSuffixTextDisplay(Text original, String suffix, String pseudo){
+		if (suffix != null && me.shedaniel.autoconfig.AutoConfig.getConfigHolder(nerd.amara.ModConfig.class).getConfig().showInNametag) {
+			if (AutoConfig.getConfigHolder(ModConfig.class).getConfig().smallIcons){
+				return Text.literal(pseudo).append(Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(SMALL_FRTL_FONT)));
+			}
+			else {
+				return Text.literal(pseudo).append(Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT)));
+			}
+		}
+		return original;
+	}
+	public static void setTextInTextDisplay(PlayerInfo info, DisplayEntity.TextDisplayEntity textDisplay, String pseudo){
+		textDisplay.setText(setSuffixTextDisplay(textDisplay.getText(),ShowedTier.showed_tier(info),pseudo));
 	}
 }
