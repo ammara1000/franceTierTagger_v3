@@ -79,12 +79,19 @@ public class Francetiers_tagger implements ClientModInitializer {
 	private static final StyleSpriteSource.Font SMALL_FRTL_FONT = new StyleSpriteSource.Font(Identifier.of("frtl", "lol_small"));
 
 	public static Text setSuffixTextDisplay(Text original, String suffix, String pseudo){
-		if (suffix != null && me.shedaniel.autoconfig.AutoConfig.getConfigHolder(nerd.amara.ModConfig.class).getConfig().showInNametag) {
-			if (AutoConfig.getConfigHolder(ModConfig.class).getConfig().smallIcons){
-				return Text.literal(pseudo).append(Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(SMALL_FRTL_FONT)));
+		ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+		if (suffix != null && config.showInNametag) {
+			Text suffixText;
+			if (config.smallIcons){
+				suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(SMALL_FRTL_FONT));
+			} else {
+				suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT));
 			}
-			else {
-				return Text.literal(pseudo).append(Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT)));
+
+			if (config.tierPosition == ModConfig.TierPosition.LEFT) {
+				return suffixText.copy().append(Text.literal(" ")).append(Text.literal(pseudo));
+			} else {
+				return Text.literal(pseudo).append(Text.literal(" ")).append(suffixText);
 			}
 		}
 		return original;
