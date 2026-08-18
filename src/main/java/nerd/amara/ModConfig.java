@@ -26,6 +26,25 @@ public class ModConfig implements ConfigData {
     @ConfigEntry.Category("display")
     public boolean smallIcons = false;
 
+    @ConfigEntry.Category("display")
+    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+    public TierPosition tierPosition = TierPosition.RIGHT;
+
+    public enum TierPosition {
+        LEFT("Left"),
+        RIGHT("Right");
+
+        private final String displayName;
+
+        TierPosition(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
+
     public enum Gamemode {
         ALL("All"),
         CRYSTAL("Crystal"),
