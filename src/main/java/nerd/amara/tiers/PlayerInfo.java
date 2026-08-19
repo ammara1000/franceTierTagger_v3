@@ -13,4 +13,5 @@ public class PlayerInfo {
     public String background_color;
     public String text_color;
     public String region;
+    public String uuid;
 }

@@ -94,6 +94,35 @@ public class Francetiers_tagger implements ClientModInitializer {
 			}
 		}));
 
+		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_WORLD_TICK.register(clientWorld -> {
+			for (PlayerEntity player : clientWorld.getPlayers()) {
+				String pseudo = player.getName().getString();
+				PlayerInfoCache.CachedEntry cached = PlayerInfoCache.get(pseudo);
+				if (cached != null && cached.result == PlayerInfoCache.Result.FOUND) {
+					nerd.amara.tiers.Tier tierObj = ShowedTier.getDisplayedTierObj(cached.info);
+					if (tierObj != null && tierObj.tier != null) {
+						if (tierObj.tier.equals("HT1") || tierObj.tier.equals("RHT1")) {
+							if (Math.random() < 0.2) {
+								clientWorld.addParticleClient(net.minecraft.particle.ParticleTypes.END_ROD, 
+									player.getX() + (Math.random() - 0.5) * 1.5, 
+									player.getY() + Math.random() * 2.0, 
+									player.getZ() + (Math.random() - 0.5) * 1.5, 
+									0.0D, 0.05D, 0.0D);
+							}
+						} else if (tierObj.tier.equals("HT2") || tierObj.tier.equals("RHT2")) {
+							if (Math.random() < 0.1) {
+								clientWorld.addParticleClient(net.minecraft.particle.ParticleTypes.ENCHANT, 
+									player.getX() + (Math.random() - 0.5) * 1.2, 
+									player.getY() + Math.random() * 2.0, 
+									player.getZ() + (Math.random() - 0.5) * 1.2, 
+									0.0D, 0.1D, 0.0D);
+							}
+						}
+					}
+				}
+			}
+		});
+
 		LOGGER.info("france tiers tagger initialized");
 	}
 

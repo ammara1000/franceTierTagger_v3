@@ -2,56 +2,56 @@
   "providers": [
     {
       "type": "bitmap",
-      "file": "font/gamemodes/classic/crystal.png",
+      "file": "frtl:font/gamemodes/mctiers/vanilla.png",
       "height": 10,
       "ascent": 10,
       "chars": ["\uF000"]
     },
     {
       "type": "bitmap",
-      "file": "font/gamemodes/classic/uhc.png",
+      "file": "frtl:font/gamemodes/mctiers/uhc.png",
       "height": 10,
       "ascent": 10,
       "chars": ["\uF001"]
     },
     {
       "type": "bitmap",
-      "file": "font/gamemodes/classic/pot.png",
+      "file": "frtl:font/gamemodes/mctiers/pot.png",
       "height": 10,
       "ascent": 10,
       "chars": ["\uF002"]
     },
     {
       "type": "bitmap",
-      "file": "font/gamemodes/classic/neth_pot.png",
+      "file": "frtl:font/gamemodes/mctiers/neth_op.png",
       "height": 10,
       "ascent": 10,
       "chars": ["\uF003"]
     },
     {
       "type": "bitmap",
-      "file": "font/gamemodes/classic/smp.png",
+      "file": "frtl:font/gamemodes/mctiers/smp.png",
       "height": 10,
       "ascent": 10,
       "chars": ["\uF004"]
     },
     {
       "type": "bitmap",
-      "file": "font/gamemodes/classic/sword.png",
+      "file": "frtl:font/gamemodes/mctiers/sword.png",
       "height": 10,
       "ascent": 10,
       "chars": ["\uF005"]
     },
     {
       "type": "bitmap",
-      "file": "font/gamemodes/classic/axe.png",
+      "file": "frtl:font/gamemodes/mctiers/axe.png",
       "height": 10,
       "ascent": 10,
       "chars": ["\uF006"]
     },
     {
       "type": "bitmap",
-      "file": "font/gamemodes/classic/mace.png",
+      "file": "frtl:font/gamemodes/mctiers/mace.png",
       "height": 10,
       "ascent": 10,
       "chars": ["\uF007"]
