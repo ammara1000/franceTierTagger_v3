@@ -78,6 +78,8 @@ public class TierScreen extends Screen {
         return String.valueOf((char) (base + offset));
     }
 
+    private net.minecraft.client.network.OtherClientPlayerEntity dummyPlayer;
+
     public TierScreen(PlayerInfo playerInfo) {
         super(Text.literal("Profil de " + playerInfo.pseudo));
         this.playerInfo = playerInfo;
@@ -87,32 +89,20 @@ public class TierScreen extends Screen {
                 String urlStr = "https://mc-heads.net/body/" + playerInfo.pseudo + "/54";
                 URL url = new java.net.URI(urlStr).toURL();
                 try (InputStream is = url.openStream()) {
-                    java.awt.image.BufferedImage original = javax.imageio.ImageIO.read(is);
-                    if (original != null) {
-                        java.awt.image.BufferedImage rgbaImage = new java.awt.image.BufferedImage(original.getWidth(), original.getHeight(), java.awt.image.BufferedImage.TYPE_INT_ARGB);
-                        java.awt.Graphics2D g = rgbaImage.createGraphics();
-                        g.drawImage(original, 0, 0, null);
-                        g.dispose();
-
-                        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-                        javax.imageio.ImageIO.write(rgbaImage, "png", baos);
-                        java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(baos.toByteArray());
-                        
-                        NativeImage image = NativeImage.read(bais);
-                        MinecraftClient.getInstance().execute(() -> {
-                            String avatarStr = "avatar_" + playerInfo.pseudo.toLowerCase();
-                            this.playerAvatarId = Identifier.of("tier", avatarStr);
-                            if (!REGISTERED_AVATARS.contains(avatarStr)) {
-                                NativeImageBackedTexture texture = new NativeImageBackedTexture(() -> avatarStr, image);
-                                texture.upload();
-                                MinecraftClient.getInstance().getTextureManager().registerTexture(this.playerAvatarId, texture);
-                                REGISTERED_AVATARS.add(avatarStr);
-                            } else {
-                                image.close();
-                            }
-                            this.avatarLoaded = true;
-                        });
-                    }
+                    NativeImage image = NativeImage.read(is);
+                    MinecraftClient.getInstance().execute(() -> {
+                        String avatarStr = "avatar_" + playerInfo.pseudo.toLowerCase();
+                        this.playerAvatarId = Identifier.of("tier", avatarStr);
+                        if (!REGISTERED_AVATARS.contains(avatarStr)) {
+                            NativeImageBackedTexture texture = new NativeImageBackedTexture(() -> avatarStr, image);
+                            texture.upload();
+                            MinecraftClient.getInstance().getTextureManager().registerTexture(this.playerAvatarId, texture);
+                            REGISTERED_AVATARS.add(avatarStr);
+                        } else {
+                            image.close();
+                        }
+                        this.avatarLoaded = true;
+                    });
                 }
             } catch (Exception ignored) {
             }
@@ -150,8 +140,9 @@ public class TierScreen extends Screen {
         int startY = (this.height - windowHeight) / 2;
 
         int gridCenterX = startX + 210;
+        
         if (this.avatarLoaded && this.playerAvatarId != null) {
-            context.drawTexturedQuad(this.playerAvatarId, startX + 23, startX + 23 + 54, startY + 40, startY + 40 + 120, 0f, 1f, 0f, 1f);
+            context.drawTexture(net.minecraft.client.gl.RenderPipelines.GUI_TEXTURED, this.playerAvatarId, startX + 23, startY + 40, 0f, 0f, 54, 120, 54, 120);
         } else {
             context.drawCenteredTextWithShadow(this.textRenderer, "Chargement...", startX + 50, startY + 100, 0xFFAAAAAA);
         }
@@ -283,7 +274,7 @@ public class TierScreen extends Screen {
         String lower = modeName.toLowerCase();
         
         String unicode = "\uF005";
-        net.minecraft.util.Identifier fontId = net.minecraft.util.Identifier.of("minecraft", "gamemodes/mctiers");
+        net.minecraft.util.Identifier fontId = net.minecraft.util.Identifier.of("frtl", "gamemodes/mctiers");
         
         if (lower.contains("crystal") || lower.contains("vanilla")) unicode = "\uF000";
         else if (lower.contains("uhc")) unicode = "\uF001";
@@ -294,7 +285,7 @@ public class TierScreen extends Screen {
         else if (lower.contains("smp") && !lower.contains("dia")) unicode = "\uF004";
         else if (lower.contains("diasmp") || lower.contains("diamond")) {
             unicode = "\uF007";
-            fontId = net.minecraft.util.Identifier.of("minecraft", "gamemodes/subtiers");
+            fontId = net.minecraft.util.Identifier.of("frtl", "gamemodes/subtiers");
         }
         
         return Text.literal(unicode).setStyle(net.minecraft.text.Style.EMPTY.withFont(new net.minecraft.text.StyleSpriteSource.Font(fontId)).withColor(0xFFFFFFFF));

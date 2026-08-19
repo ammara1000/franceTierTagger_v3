@@ -69,7 +69,7 @@ public class ShowedTier {
         return String.valueOf((char) (base + offset));
     }
 
-    public static String showed_tier(PlayerInfo info){
+    public static Tier getDisplayedTierObj(PlayerInfo info){
         ModConfig config = me.shedaniel.autoconfig.AutoConfig.getConfigHolder(ModConfig.class).getConfig();
         ModConfig.Gamemode currentMode = config.gamemode;
         if (currentMode == null) {
@@ -77,10 +77,10 @@ public class ShowedTier {
             config.gamemode = currentMode;
         }
         if (!config.enabled || currentMode == ModConfig.Gamemode.MOD_OFF){
-            return "";
+            return null;
         }
         if (info==null){
-            return "";
+            return null;
         }
 
         if (currentMode != ModConfig.Gamemode.ALL) {
@@ -88,13 +88,13 @@ public class ShowedTier {
             if (info.tiers != null && info.tiers.containsKey(targetMode)) {
                 Tier specific = info.tiers.get(targetMode);
                 if (!Objects.equals(specific.tier, "N/A")) {
-                    return formatBadge(specific.tier, specific.category);
+                    return specific;
                 }
             }
             if (info.retired_tiers != null) {
                 for (Tier element : info.retired_tiers) {
                     if (Objects.equals(element.category, targetMode)) {
-                        return formatBadge(element.tier, element.category);
+                        return element;
                     }
                 }
             }
@@ -107,18 +107,25 @@ public class ShowedTier {
             if (bestRetiredIdx != null) {
                 Tier bestRetired = info.retired_tiers.get(bestRetiredIdx);
                 if (bestActiveKey == null) {
-                    return formatBadge(bestRetired.tier, bestRetired.category);
+                    return bestRetired;
                 }
                 Tier bestActive = info.tiers.get(bestActiveKey);
                 if (importance.get(bestRetired.tier) > importance.get(bestActive.tier)) {
-                    return formatBadge(bestRetired.tier, bestRetired.category);
+                    return bestRetired;
                 }
             }
 
             if (bestActiveKey != null) {
-                Tier bestActive = info.tiers.get(bestActiveKey);
-                return formatBadge(bestActive.tier, bestActive.category);
+                return info.tiers.get(bestActiveKey);
             }
+        }
+        return null;
+    }
+
+    public static String showed_tier(PlayerInfo info){
+        Tier best = getDisplayedTierObj(info);
+        if (best != null) {
+            return formatBadge(best.tier, best.category);
         }
         return "";
     }
@@ -154,7 +161,7 @@ public class ShowedTier {
         
         ModConfig config = me.shedaniel.autoconfig.AutoConfig.getConfigHolder(ModConfig.class).getConfig();
         String gamemodeChar = config.showKitIcon ? getGamemodeChar(category, level) : "";
-        return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.getOrDefault(tier, "") + gamemodeChar;
+        return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.getOrDefault(tier, "") + "\uF804" + gamemodeChar;
     }
 
     private static String bestActiveGamemode(Map<String, Tier> tiers) {

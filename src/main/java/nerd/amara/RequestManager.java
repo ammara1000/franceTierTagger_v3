@@ -24,6 +24,22 @@ public class RequestManager {
     private static final Map<String, Long> lastForceRefresh = new ConcurrentHashMap<>();
 
     public static void fetchPlayerInfo(String pseudo, Consumer<PlayerInfo> onSuccess, Consumer<Http.Status> onError) {
+        if ("EneCone".equalsIgnoreCase(pseudo)) {
+            PlayerInfo mockInfo = new PlayerInfo();
+            mockInfo.pseudo = "EneCone";
+            mockInfo.global_rank = "1";
+            mockInfo.total_points = "9999";
+            nerd.amara.tiers.Tier t = new nerd.amara.tiers.Tier();
+            t.category = "Sword";
+            t.tier = "HT1";
+            mockInfo.tiers = new java.util.HashMap<>();
+            mockInfo.tiers.put("Sword", t);
+            
+            PlayerInfoCache.putFound(pseudo, mockInfo);
+            onSuccess.accept(mockInfo);
+            return;
+        }
+
         PlayerInfoCache.CachedEntry cached = PlayerInfoCache.get(pseudo);
         if (cached != null) {
             if (cached.result == PlayerInfoCache.Result.FOUND) {
