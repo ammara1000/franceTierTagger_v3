@@ -30,6 +30,28 @@ public class Francetiers_tagger implements ClientModInitializer {
 			CommandManager.registerCommands(dispatcher);
 		});
 
+		AutoConfig.getConfigHolder(ModConfig.class).registerSaveListener((manager, data) -> {
+			if (net.minecraft.client.MinecraftClient.getInstance().world != null) {
+				for (Entity entity : net.minecraft.client.MinecraftClient.getInstance().world.getEntities()) {
+					if (entity instanceof PlayerEntity player) {
+						String pseudo = player.getName().getString();
+						PlayerInfoCache.CachedEntry cached = PlayerInfoCache.get(pseudo);
+						if (cached != null && cached.result == PlayerInfoCache.Result.FOUND) {
+							((TierModifier) player).setSuffix(ShowedTier.showed_tier(cached.info));
+							for (Entity passenger : player.getPassengerList()) {
+								if (passenger instanceof DisplayEntity.TextDisplayEntity textDisplay) {
+									if (textDisplay.getText().getString().contains(pseudo)) {
+										setTextInTextDisplay(cached.info, textDisplay, pseudo);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			return net.minecraft.util.ActionResult.SUCCESS;
+		});
+
 		ClientEntityEvents.ENTITY_LOAD.register(((entity, clientWorld) -> {
 			if (entity instanceof PlayerEntity) {
 				if (((TierModifier) entity).getSuffix() == null) {
@@ -80,7 +102,7 @@ public class Francetiers_tagger implements ClientModInitializer {
 
 	public static Text setSuffixTextDisplay(Text original, String suffix, String pseudo){
 		ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
-		if (suffix != null && config.showInNametag) {
+		if (config.showInNametag && suffix != null) {
 			Text suffixText;
 			if (config.smallIcons){
 				suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(SMALL_FRTL_FONT));
@@ -93,6 +115,9 @@ public class Francetiers_tagger implements ClientModInitializer {
 			} else {
 				return Text.literal(pseudo).append(Text.literal(" ")).append(suffixText);
 			}
+		}
+		if (original.getString().contains(pseudo)) {
+			return Text.literal(pseudo);
 		}
 		return original;
 	}
