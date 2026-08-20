@@ -161,7 +161,7 @@ public class ShowedTier {
         
         ModConfig config = me.shedaniel.autoconfig.AutoConfig.getConfigHolder(ModConfig.class).getConfig();
         String gamemodeChar = config.showKitIcon ? getGamemodeChar(category, level) : "";
-        return "\uEEEE\uEEEE\uEEEE\uEEEE" + tiers_emoji.getOrDefault(tier, "") + "\uF804" + gamemodeChar;
+        return /*"\uEEEE\uEEEE\uEEEE\uEEEE" + */ tiers_emoji.getOrDefault(tier, "") + "\uF804" + gamemodeChar;
     }
 
     private static String bestActiveGamemode(Map<String, Tier> tiers) {
