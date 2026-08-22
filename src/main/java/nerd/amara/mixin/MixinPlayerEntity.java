@@ -15,6 +15,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
+import java.util.Objects;
+
 @Mixin(PlayerEntity.class)
 public abstract class MixinPlayerEntity implements TierModifier {
     @Shadow public abstract void remove(Entity.RemovalReason reason);
@@ -41,16 +43,18 @@ public abstract class MixinPlayerEntity implements TierModifier {
         if (suffix != null && me.shedaniel.autoconfig.AutoConfig.getConfigHolder(nerd.amara.ModConfig.class).getConfig().showInNametag) {
             ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
             Text suffixText;
-            if (config.smallIcons){
-                suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(SMALL_FRTL_FONT));
-            } else {
-                suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT));
-            }
+            if (!Objects.equals(suffix, "")) {
+                if (config.smallIcons) {
+                    suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(SMALL_FRTL_FONT));
+                } else {
+                    suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT));
+                }
 
-            if (config.tierPosition == ModConfig.TierPosition.LEFT) {
-                return suffixText.copy().append(Text.literal(" ")).append(original.copy());
-            } else {
-                return original.copy().append(Text.literal(" ")).append(suffixText);
+                if (config.tierPosition == ModConfig.TierPosition.LEFT) {
+                    return Text.empty().append(suffixText.copy()).append(Text.literal(" ")).append(original.copy());
+                } else {
+                    return Text.empty().append(original.copy()).append(Text.literal(" ")).append(suffixText);
+                }
             }
         }
         return original;
