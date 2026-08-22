@@ -17,6 +17,8 @@ import net.minecraft.util.math.Box;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
+
 public class Francetiers_tagger implements ClientModInitializer {
 	public static final String MOD_ID = "francetiers_tagger";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
@@ -132,17 +134,19 @@ public class Francetiers_tagger implements ClientModInitializer {
 	public static Text setSuffixTextDisplay(Text original, String suffix, String pseudo){
 		ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
 		if (config.showInNametag && suffix != null) {
-			Text suffixText;
-			if (config.smallIcons){
-				suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(SMALL_FRTL_FONT));
-			} else {
-				suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT));
-			}
+			if (!Objects.equals(suffix, "")) {
+				Text suffixText;
+				if (config.smallIcons) {
+					suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(SMALL_FRTL_FONT));
+				} else {
+					suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT));
+				}
 
-			if (config.tierPosition == ModConfig.TierPosition.LEFT) {
-				return suffixText.copy().append(Text.literal(" ")).append(Text.literal(pseudo));
-			} else {
-				return Text.literal(pseudo).append(Text.literal(" ")).append(suffixText);
+				if (config.tierPosition == ModConfig.TierPosition.LEFT) {
+					return Text.empty().append(suffixText.copy()).append(Text.literal(" ")).append(original.copy());
+				} else {
+					return Text.empty().append(original.copy()).append(Text.literal(" ")).append(suffixText);
+				}
 			}
 		}
 		if (original.getString().contains(pseudo)) {
