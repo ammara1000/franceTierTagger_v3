@@ -40,6 +40,15 @@
 2. [Fabric API](https://modrinth.com/mod/fabric-api)
 3. Télécharger le mod sur [Modrinth](https://modrinth.com/mod/francetierstagger) et le placer dans le dossier `mods`
 
+## Commandes
+
+Le mod utilise la commande principale `/francetiers` ou l'alias `/frtl` :
+
+- `/frtl` : Affiche ton propre profil FranceTiers (ouvre l'interface 2D).
+- `/frtl show <pseudo>` : Affiche le profil FranceTiers d'un autre joueur.
+- `/frtl refresh <pseudo>` : Force la mise à jour immédiate du profil d'un joueur (bypasse le délai).
+- `/frtl config` : Ouvre le menu de configuration du mod.
+
 ## Compilation
 
 ```bash
