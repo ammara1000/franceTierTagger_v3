@@ -27,8 +27,11 @@
 ## Fonctionnalités
 
 - Affiche automatiquement le tier FranceTiers de chaque joueur au-dessus de sa tête
-- `/francetiers <pseudo>` : détail complet des tiers d'un joueur dans le chat
+- **Nouveau** : Affichage du tier directement dans la Tab List (position modifiable via ModMenu)
+- **Nouveau** : Icônes de gamemode dynamiques avec des couleurs selon le tier (Tier 5 = Fer, Tier 4 = Or, Tier 3 = Émeraude, Tier 2 = Diamant, Tier 1 = Netherite)
+- `/francetiers <pseudo>` (ou `/frtl <pseudo>`) : Ouvre une interface 2D détaillée pour voir les tiers du joueur et son skin
 - Filtre par gamemode (Crystal, Sword, UHC, Pot, NethPot, SMP, Axe, DiaSMP, Mace) via un raccourci clavier
+- Effets de particules cosmiques pour les joueurs de très haut niveau (Haut Tiers)
 - 100% client-side, aucune installation nécessaire côté serveur
 
 ## Installation
