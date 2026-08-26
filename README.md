@@ -43,8 +43,8 @@
 ## Compilation
 
 ```bash
-git clone https://github.com/ammara1000/franceTierTagger_v2.git
-cd franceTierTagger_v2
+git clone https://github.com/ammara1000/franceTierTagger_v3.git
+cd franceTierTagger_v3
 ./gradlew build
 ```
 
