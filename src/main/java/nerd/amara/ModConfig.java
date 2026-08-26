@@ -24,6 +24,9 @@ public class ModConfig implements ConfigData {
     public boolean showKitIcon = true;
 
     @ConfigEntry.Category("display")
+    public boolean showParticles = true;
+
+    @ConfigEntry.Category("display")
     public boolean smallIcons = false;
 
     @ConfigEntry.Category("display")

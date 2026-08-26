@@ -97,7 +97,12 @@ public class Francetiers_tagger implements ClientModInitializer {
 		}));
 
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_WORLD_TICK.register(clientWorld -> {
+			ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+			if (!config.showParticles) return;
+
 			for (PlayerEntity player : clientWorld.getPlayers()) {
+				if (player.isInvisible()) continue;
+
 				String pseudo = player.getName().getString();
 				PlayerInfoCache.CachedEntry cached = PlayerInfoCache.get(pseudo);
 				if (cached != null && cached.result == PlayerInfoCache.Result.FOUND) {
@@ -111,7 +116,7 @@ public class Francetiers_tagger implements ClientModInitializer {
 									player.getZ() + (Math.random() - 0.5) * 1.5, 
 									0.0D, 0.05D, 0.0D);
 							}
-						} else if (tierObj.tier.equals("HT2") || tierObj.tier.equals("RHT2")) {
+						} else if (tierObj.tier.equals("LT1") || tierObj.tier.equals("RLT1")) {
 							if (Math.random() < 0.1) {
 								clientWorld.addParticleClient(net.minecraft.particle.ParticleTypes.ENCHANT, 
 									player.getX() + (Math.random() - 0.5) * 1.2, 
