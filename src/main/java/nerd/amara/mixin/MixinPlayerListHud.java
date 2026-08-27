@@ -40,14 +40,19 @@ public class MixinPlayerListHud {
             String prefix = ShowedTier.showed_tier(cached.info);
             if (prefix != null && !prefix.isEmpty()) {
                 net.minecraft.text.MutableText nameText = net.minecraft.text.Text.empty();
-                if (AutoConfig.getConfigHolder(ModConfig.class).getConfig().smallIcons){
-                    nameText.append(net.minecraft.text.Text.literal(prefix).styled(s -> s.withColor(Formatting.WHITE).withFont(SMALL_FRTL_FONT)));
+                
+                net.minecraft.text.MutableText tierComponent = net.minecraft.text.Text.literal(prefix).styled(s -> s.withColor(Formatting.WHITE).withFont(config.smallIcons ? SMALL_FRTL_FONT : FRTL_FONT));
+                
+                if (config.tierPosition == ModConfig.TierPosition.RIGHT) {
+                    nameText.append(original != null ? original : net.minecraft.text.Text.literal(pseudo));
+                    nameText.append(net.minecraft.text.Text.literal(" "));
+                    nameText.append(tierComponent);
+                } else {
+                    nameText.append(tierComponent);
+                    nameText.append(net.minecraft.text.Text.literal(" "));
+                    nameText.append(original != null ? original : net.minecraft.text.Text.literal(pseudo));
                 }
-                else {
-                    nameText.append(net.minecraft.text.Text.literal(prefix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT)));
-                }
-                nameText.append(net.minecraft.text.Text.literal(" "));
-                nameText.append(original != null ? original : net.minecraft.text.Text.literal(pseudo));
+                
                 return nameText;
             }
         }
@@ -55,3 +60,4 @@ public class MixinPlayerListHud {
         return original != null ? original : Text.literal(pseudo);
     }
 }
+

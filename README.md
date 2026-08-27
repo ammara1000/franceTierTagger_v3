@@ -27,8 +27,11 @@
 ## Fonctionnalités
 
 - Affiche automatiquement le tier FranceTiers de chaque joueur au-dessus de sa tête
-- `/francetiers <pseudo>` : détail complet des tiers d'un joueur dans le chat
+- **Nouveau** : Affichage du tier directement dans la Tab List (position modifiable via ModMenu)
+- **Nouveau** : Icônes de gamemode dynamiques avec des couleurs selon le tier (Tier 5 = Fer, Tier 4 = Or, Tier 3 = Émeraude, Tier 2 = Diamant, Tier 1 = Netherite)
+- `/francetiers <pseudo>` (ou `/frtl <pseudo>`) : Ouvre une interface 2D détaillée pour voir les tiers du joueur et son skin
 - Filtre par gamemode (Crystal, Sword, UHC, Pot, NethPot, SMP, Axe, DiaSMP, Mace) via un raccourci clavier
+- Effets de particules cosmiques pour les joueurs de très haut niveau (Haut Tiers)
 - 100% client-side, aucune installation nécessaire côté serveur
 
 ## Installation
@@ -37,11 +40,20 @@
 2. [Fabric API](https://modrinth.com/mod/fabric-api)
 3. Télécharger le mod sur [Modrinth](https://modrinth.com/mod/francetierstagger) et le placer dans le dossier `mods`
 
+## Commandes
+
+Le mod utilise la commande principale `/francetiers` ou l'alias `/frtl` :
+
+- `/frtl` : Affiche ton propre profil FranceTiers (ouvre l'interface 2D).
+- `/frtl show <pseudo>` : Affiche le profil FranceTiers d'un autre joueur.
+- `/frtl refresh <pseudo>` : Force la mise à jour immédiate du profil d'un joueur (bypasse le délai).
+- `/frtl config` : Ouvre le menu de configuration du mod.
+
 ## Compilation
 
 ```bash
-git clone https://github.com/ammara1000/franceTierTagger_v2.git
-cd franceTierTagger_v2
+git clone https://github.com/ammara1000/franceTierTagger_v3.git
+cd franceTierTagger_v3
 ./gradlew build
 ```
 
