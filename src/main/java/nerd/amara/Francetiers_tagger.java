@@ -102,13 +102,15 @@ public class Francetiers_tagger implements ClientModInitializer {
 
 		ClientTickEvents.END_WORLD_TICK.register((world)->{
 			for (DisplayEntity.TextDisplayEntity textDisplay : TextDisplayList){
-				Entity vehicle = textDisplay.getVehicle();
-				if (vehicle instanceof PlayerEntity player) {
-					String pseudo = player.getName().getString();
-					if (textDisplay.getText().getString().contains(pseudo)) {
-						PlayerInfoCache.CachedEntry cached = PlayerInfoCache.get(pseudo);
-						if (cached != null && cached.result == PlayerInfoCache.Result.FOUND) {
-							setTextInTextDisplay(cached.info, textDisplay, pseudo);
+				if (!textDisplay.getText().toString().contains("frtl")){
+					Entity vehicle = textDisplay.getVehicle();
+					if (vehicle instanceof PlayerEntity player) {
+						String pseudo = player.getName().getString();
+						if (textDisplay.getText().getString().contains(pseudo)) {
+							PlayerInfoCache.CachedEntry cached = PlayerInfoCache.get(pseudo);
+							if (cached != null && cached.result == PlayerInfoCache.Result.FOUND) {
+								setTextInTextDisplay(cached.info, textDisplay, pseudo);
+							}
 						}
 					}
 				}
