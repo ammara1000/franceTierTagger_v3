@@ -6,7 +6,6 @@ import net.fabricmc.api.ClientModInitializer;
 
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -18,15 +17,12 @@ import net.minecraft.util.math.Box;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Objects;
-import java.util.UUID;
 
 public class Francetiers_tagger implements ClientModInitializer {
 	public static final String MOD_ID = "francetiers_tagger";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static String web_url="https://francetiers.fr/search_playerV2.php?pseudo=";
-	public static ArrayList<DisplayEntity.TextDisplayEntity> TextDisplayList = new ArrayList<>();
 
 	@Override
 	public void onInitializeClient() {
@@ -84,22 +80,6 @@ public class Francetiers_tagger implements ClientModInitializer {
 			} else if (entity instanceof DisplayEntity.TextDisplayEntity textDisplay) {
 				Entity vehicle = textDisplay.getVehicle();
 				if (vehicle instanceof PlayerEntity player) {
-					TextDisplayList.add(textDisplay);
-					String pseudo = player.getName().getString();
-					if (textDisplay.getText().getString().contains(pseudo)) {
-						PlayerInfoCache.CachedEntry cached = PlayerInfoCache.get(pseudo);
-						if (cached != null && cached.result == PlayerInfoCache.Result.FOUND) {
-							setTextInTextDisplay(cached.info, textDisplay, pseudo);
-						}
-					}
-				}
-			}
-		}));
-
-		ClientTickEvents.END_WORLD_TICK.register((world)->{
-			for (DisplayEntity.TextDisplayEntity textDisplay : TextDisplayList){
-				Entity vehicle = textDisplay.getVehicle();
-				if (vehicle instanceof PlayerEntity player) {
 					String pseudo = player.getName().getString();
 					if (textDisplay.getText().getString().contains(pseudo)) {
 						RequestManager.fetchPlayerInfo(pseudo,
@@ -114,10 +94,15 @@ public class Francetiers_tagger implements ClientModInitializer {
 					}
 				}
 			}
-		});
+		}));
 
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_WORLD_TICK.register(clientWorld -> {
+			ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+			if (!config.showParticles) return;
+
 			for (PlayerEntity player : clientWorld.getPlayers()) {
+				if (player.isInvisible()) continue;
+
 				String pseudo = player.getName().getString();
 				PlayerInfoCache.CachedEntry cached = PlayerInfoCache.get(pseudo);
 				if (cached != null && cached.result == PlayerInfoCache.Result.FOUND) {
@@ -131,7 +116,7 @@ public class Francetiers_tagger implements ClientModInitializer {
 									player.getZ() + (Math.random() - 0.5) * 1.5, 
 									0.0D, 0.05D, 0.0D);
 							}
-						} else if (tierObj.tier.equals("HT2") || tierObj.tier.equals("RHT2")) {
+						} else if (tierObj.tier.equals("LT1") || tierObj.tier.equals("RLT1")) {
 							if (Math.random() < 0.1) {
 								clientWorld.addParticleClient(net.minecraft.particle.ParticleTypes.ENCHANT, 
 									player.getX() + (Math.random() - 0.5) * 1.2, 

@@ -22,7 +22,7 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class CommandManager {
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-        dispatcher.register(literal("francetiers")
+        var francetiersCmd = literal("francetiers")
                 .executes(context -> {
                     handleShowTier(ownName());
                     return 1;
@@ -55,8 +55,10 @@ public class CommandManager {
                                 MinecraftClient.getInstance().setScreen(AutoConfig.getConfigScreen(ModConfig.class, MinecraftClient.getInstance().currentScreen).get());
                             });
                             return 1;
-                        }))
-        );
+                        }));
+
+        dispatcher.register(francetiersCmd);
+        dispatcher.register(literal("frtl").redirect(francetiersCmd.build()));
     }
 
     private static String ownName() {
