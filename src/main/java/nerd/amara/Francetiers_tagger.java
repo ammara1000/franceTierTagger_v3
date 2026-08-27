@@ -6,6 +6,7 @@ import net.fabricmc.api.ClientModInitializer;
 
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -17,12 +18,14 @@ import net.minecraft.util.math.Box;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class Francetiers_tagger implements ClientModInitializer {
 	public static final String MOD_ID = "francetiers_tagger";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static String web_url="https://francetiers.fr/search_playerV2.php?pseudo=";
+	public static ArrayList<DisplayEntity.TextDisplayEntity> TextDisplayList = new ArrayList<>();
 
 	@Override
 	public void onInitializeClient() {
@@ -63,6 +66,7 @@ public class Francetiers_tagger implements ClientModInitializer {
 								((TierModifier) entity).setSuffix(ShowedTier.showed_tier(info));
 								for (Entity passenger : entity.getPassengerList()) {
 									if (passenger instanceof DisplayEntity.TextDisplayEntity textDisplay) {
+										TextDisplayList.add(textDisplay);
 										if (textDisplay.getText().getString().contains(pseudo)) {
 											setTextInTextDisplay(info, textDisplay, pseudo);
 										}
@@ -95,6 +99,21 @@ public class Francetiers_tagger implements ClientModInitializer {
 				}
 			}
 		}));
+
+		ClientTickEvents.END_WORLD_TICK.register((world)->{
+			for (DisplayEntity.TextDisplayEntity textDisplay : TextDisplayList){
+				Entity vehicle = textDisplay.getVehicle();
+				if (vehicle instanceof PlayerEntity player) {
+					String pseudo = player.getName().getString();
+					if (textDisplay.getText().getString().contains(pseudo)) {
+						PlayerInfoCache.CachedEntry cached = PlayerInfoCache.get(pseudo);
+						if (cached != null && cached.result == PlayerInfoCache.Result.FOUND) {
+							setTextInTextDisplay(cached.info, textDisplay, pseudo);
+						}
+					}
+				}
+			}
+		});
 
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_WORLD_TICK.register(clientWorld -> {
 			ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
