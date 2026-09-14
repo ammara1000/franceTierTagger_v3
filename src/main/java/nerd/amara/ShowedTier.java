@@ -110,7 +110,7 @@ public class ShowedTier {
                     return bestRetired;
                 }
                 Tier bestActive = info.tiers.get(bestActiveKey);
-                if (importance.get(bestRetired.tier) > importance.get(bestActive.tier)) {
+                if (importance.getOrDefault(bestRetired.tier, -1) > importance.getOrDefault(bestActive.tier, -1)) {
                     return bestRetired;
                 }
             }
@@ -132,7 +132,7 @@ public class ShowedTier {
 
     public static String showed_message(PlayerInfo info){
         if (info.tiers==null) {
-            return "JOUEUR NON CLASSÉ";
+            return "JOUEUR NON CLASSÃ‰";
         }
         String msg="";
         msg=msg+"\ued09 FRANCETIERS \ued09\nPLAYER: "+info.pseudo+"\nTOP "+info.global_rank+" ("+info.total_points+" points) \nTIERS:";
@@ -145,7 +145,7 @@ public class ShowedTier {
             }
         }
         if (!hasTier){
-            return "JOUEUR NON CLASSÉ";
+            return "JOUEUR NON CLASSÃ‰";
         }
         return msg;
     }
@@ -171,7 +171,7 @@ public class ShowedTier {
             if (Objects.equals(tier, "N/A")) {
                 continue;
             }
-            if (best == null || importance.get(tiers.get(best).tier) < importance.get(tier)) {
+            if (best == null || importance.getOrDefault(tiers.get(best).tier, -1) < importance.getOrDefault(tier, -1)) {
                 best = key;
             }
         }
@@ -182,7 +182,7 @@ public class ShowedTier {
         Integer best = null;
         for (int i = 0; i < retiredTiers.size(); i++) {
             String tier = retiredTiers.get(i).tier;
-            if (best == null || importance.get(retiredTiers.get(best).tier) < importance.get(tier)) {
+            if (best == null || importance.getOrDefault(retiredTiers.get(best).tier, -1) < importance.getOrDefault(tier, -1)) {
                 best = i;
             }
         }
