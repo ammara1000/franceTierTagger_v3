@@ -25,7 +25,7 @@ public class Francetiers_tagger implements ClientModInitializer {
 	public static final String MOD_ID = "francetiers_tagger";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static String web_url="https://francetiers.fr/search_playerV2.php?pseudo=";
-	public static ArrayList<DisplayEntity.TextDisplayEntity> TextDisplayList = new ArrayList<>();
+	public static java.util.concurrent.CopyOnWriteArrayList<DisplayEntity.TextDisplayEntity> TextDisplayList = new java.util.concurrent.CopyOnWriteArrayList<>();
 
 	@Override
 	public void onInitializeClient() {
@@ -66,7 +66,7 @@ public class Francetiers_tagger implements ClientModInitializer {
 								((TierModifier) entity).setSuffix(ShowedTier.showed_tier(info));
 								for (Entity passenger : entity.getPassengerList()) {
 									if (passenger instanceof DisplayEntity.TextDisplayEntity textDisplay) {
-										TextDisplayList.add(textDisplay);
+										TextDisplayList.addIfAbsent(textDisplay);
 										if (textDisplay.getText().getString().contains(pseudo)) {
 											setTextInTextDisplay(info, textDisplay, pseudo);
 										}
@@ -84,6 +84,7 @@ public class Francetiers_tagger implements ClientModInitializer {
 			} else if (entity instanceof DisplayEntity.TextDisplayEntity textDisplay) {
 				Entity vehicle = textDisplay.getVehicle();
 				if (vehicle instanceof PlayerEntity player) {
+					TextDisplayList.addIfAbsent(textDisplay);
 					String pseudo = player.getName().getString();
 					if (textDisplay.getText().getString().contains(pseudo)) {
 						RequestManager.fetchPlayerInfo(pseudo,
@@ -101,8 +102,12 @@ public class Francetiers_tagger implements ClientModInitializer {
 		}));
 
 		ClientTickEvents.END_WORLD_TICK.register((world)->{
-			for (DisplayEntity.TextDisplayEntity textDisplay : TextDisplayList){
-				if (!textDisplay.getText().toString().contains("frtl")){
+			for (DisplayEntity.TextDisplayEntity textDisplay : TextDisplayList) {
+				if (textDisplay.isRemoved()) {
+					TextDisplayList.remove(textDisplay);
+					continue;
+				}
+				if (!textDisplay.getText().getString().contains("\uF804")){
 					Entity vehicle = textDisplay.getVehicle();
 					if (vehicle instanceof PlayerEntity player) {
 						String pseudo = player.getName().getString();
