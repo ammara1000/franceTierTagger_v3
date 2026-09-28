@@ -86,15 +86,20 @@ public class ShowedTier {
 
         if (currentMode != ModConfig.Gamemode.ALL) {
             String targetMode = currentMode.getDisplayName();
-            if (info.tiers != null && info.tiers.containsKey(targetMode)) {
+            if (info.tiers != null) {
                 Tier specific = info.tiers.get(targetMode);
-                if (!Objects.equals(specific.tier, "N/A")) {
+                if (specific == null && (targetMode.equals("Crystal") || targetMode.equals("Vanilla"))) {
+                    specific = info.tiers.get(targetMode.equals("Crystal") ? "Vanilla" : "Crystal");
+                }
+                if (specific != null && !Objects.equals(specific.tier, "N/A")) {
                     return specific;
                 }
             }
             if (info.retired_tiers != null) {
                 for (Tier element : info.retired_tiers) {
-                    if (Objects.equals(element.category, targetMode)) {
+                    if (Objects.equals(element.category, targetMode) ||
+                       ((targetMode.equals("Crystal") || targetMode.equals("Vanilla")) &&
+                        (Objects.equals(element.category, "Crystal") || Objects.equals(element.category, "Vanilla")))) {
                         return element;
                     }
                 }
