@@ -55,6 +55,7 @@ public class ShowedTier {
             case "DiaSMP" -> 6;
             case "NethPot" -> 7;
             case "Axe" -> 8;
+            case "Vanilla" -> 9;
             default -> -1;
         };
         if (offset == -1) return "";

@@ -26,6 +26,7 @@ public class Francetiers_tagger implements ClientModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static String web_url="https://francetiers.fr/search_playerV2.php?pseudo=";
 	public static java.util.concurrent.CopyOnWriteArrayList<DisplayEntity.TextDisplayEntity> TextDisplayList = new java.util.concurrent.CopyOnWriteArrayList<>();
+	public static java.util.concurrent.ConcurrentHashMap<DisplayEntity.TextDisplayEntity, Text> OriginalTextMap = new java.util.concurrent.ConcurrentHashMap<>();
 
 	@Override
 	public void onInitializeClient() {
@@ -105,9 +106,11 @@ public class Francetiers_tagger implements ClientModInitializer {
 			for (DisplayEntity.TextDisplayEntity textDisplay : TextDisplayList) {
 				if (textDisplay.isRemoved()) {
 					TextDisplayList.remove(textDisplay);
+					OriginalTextMap.remove(textDisplay);
 					continue;
 				}
 				if (!textDisplay.getText().getString().contains("\uF804")){
+					OriginalTextMap.put(textDisplay, textDisplay.getText());
 					Entity vehicle = textDisplay.getVehicle();
 					if (vehicle instanceof PlayerEntity player) {
 						String pseudo = player.getName().getString();
@@ -186,6 +189,13 @@ public class Francetiers_tagger implements ClientModInitializer {
 		return original;
 	}
 	public static void setTextInTextDisplay(PlayerInfo info, DisplayEntity.TextDisplayEntity textDisplay, String pseudo){
-		textDisplay.setText(setSuffixTextDisplay(textDisplay.getText(),ShowedTier.showed_tier(info),pseudo));
+		Text original = OriginalTextMap.get(textDisplay);
+		if (original == null) {
+			original = textDisplay.getText();
+			if (!original.getString().contains("\uF804")) {
+				OriginalTextMap.put(textDisplay, original);
+			}
+		}
+		textDisplay.setText(setSuffixTextDisplay(original,ShowedTier.showed_tier(info),pseudo));
 	}
 }
