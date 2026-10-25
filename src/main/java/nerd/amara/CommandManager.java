@@ -111,8 +111,9 @@ public class CommandManager {
     private static void sendTierMessage(PlayerInfo info) {
         if (AutoConfig.getConfigHolder(ModConfig.class).getConfig().smallIcons){
             sendMessage(Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol_small")))));
-        }
-        else {
+        } else if (AutoConfig.getConfigHolder(ModConfig.class).getConfig().oldIcons) {
+            sendMessage(Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol_old")))));
+        } else {
             sendMessage(Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol")))));
         }
     }

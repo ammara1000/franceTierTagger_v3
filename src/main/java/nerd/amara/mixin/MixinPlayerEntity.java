@@ -25,6 +25,8 @@ public abstract class MixinPlayerEntity implements TierModifier {
     private static final net.minecraft.text.StyleSpriteSource.Font FRTL_FONT = new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol"));
     @Unique
     private static final net.minecraft.text.StyleSpriteSource.Font SMALL_FRTL_FONT = new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol_small"));
+    @Unique
+    private static final net.minecraft.text.StyleSpriteSource.Font OLD_FRTL_FONT = new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "old_small"));
 
     private String suffix = null;
 
@@ -46,6 +48,8 @@ public abstract class MixinPlayerEntity implements TierModifier {
             if (!Objects.equals(suffix, "")) {
                 if (config.smallIcons) {
                     suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(SMALL_FRTL_FONT));
+                } else if (config.oldIcons) {
+                    suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(OLD_FRTL_FONT));
                 } else {
                     suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT));
                 }

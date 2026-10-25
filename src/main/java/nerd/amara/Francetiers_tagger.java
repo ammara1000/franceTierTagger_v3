@@ -164,6 +164,7 @@ public class Francetiers_tagger implements ClientModInitializer {
 
 	private static final StyleSpriteSource.Font FRTL_FONT = new StyleSpriteSource.Font(Identifier.of("frtl", "lol"));
 	private static final StyleSpriteSource.Font SMALL_FRTL_FONT = new StyleSpriteSource.Font(Identifier.of("frtl", "lol_small"));
+	private static final StyleSpriteSource.Font OLD_FRTL_FONT = new StyleSpriteSource.Font(Identifier.of("frtl", "old_small"));
 
 	public static Text setSuffixTextDisplay(Text original, String suffix, String pseudo){
 		ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
@@ -172,6 +173,8 @@ public class Francetiers_tagger implements ClientModInitializer {
 				Text suffixText;
 				if (config.smallIcons) {
 					suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(SMALL_FRTL_FONT));
+				} else if (config.oldIcons) {
+					suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(OLD_FRTL_FONT));
 				} else {
 					suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT));
 				}

@@ -30,6 +30,9 @@ public class ModConfig implements ConfigData {
     public boolean smallIcons = false;
 
     @ConfigEntry.Category("display")
+    public boolean oldIcons = false;
+
+    @ConfigEntry.Category("display")
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
     public TierPosition tierPosition = TierPosition.RIGHT;
 

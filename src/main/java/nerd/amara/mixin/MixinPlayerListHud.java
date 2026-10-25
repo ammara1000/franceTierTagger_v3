@@ -22,6 +22,8 @@ public class MixinPlayerListHud {
     private static final net.minecraft.text.StyleSpriteSource.Font FRTL_FONT = new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol"));
     @Unique
     private static final net.minecraft.text.StyleSpriteSource.Font SMALL_FRTL_FONT = new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol_small"));
+    @Unique
+    private static final net.minecraft.text.StyleSpriteSource.Font OLD_FRTL_FONT = new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol_old"));
 
     @ModifyReturnValue(method = "getPlayerName", at = @At("RETURN"))
     public Text modifyPlayerName(Text original, PlayerListEntry entry) {
@@ -41,7 +43,7 @@ public class MixinPlayerListHud {
             if (prefix != null && !prefix.isEmpty()) {
                 net.minecraft.text.MutableText nameText = net.minecraft.text.Text.empty();
                 
-                net.minecraft.text.MutableText tierComponent = net.minecraft.text.Text.literal(prefix).styled(s -> s.withColor(Formatting.WHITE).withFont(config.smallIcons ? SMALL_FRTL_FONT : FRTL_FONT));
+                net.minecraft.text.MutableText tierComponent = net.minecraft.text.Text.literal(prefix).styled(s -> s.withColor(Formatting.WHITE).withFont(config.smallIcons ? SMALL_FRTL_FONT : config.oldIcons ? OLD_FRTL_FONT : FRTL_FONT));
                 
                 if (config.tierPosition == ModConfig.TierPosition.RIGHT) {
                     nameText.append(original != null ? original : net.minecraft.text.Text.literal(pseudo));
