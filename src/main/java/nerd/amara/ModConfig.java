@@ -59,6 +59,7 @@ public class ModConfig implements ConfigData {
         AXE("Axe"),
         DIASMP("DiaSMP"),
         MACE("Mace"),
+        VANILLA("Vanilla"),
         MOD_OFF("Mod Off");
 
         private final String displayName;
