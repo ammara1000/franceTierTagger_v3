@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class MixinPlayerListHud {
 
     @ModifyReturnValue(method = "getPlayerName", at = @At("RETURN"))
-    public Text modifyPlayerName(Text original, PlayerListEntry entry) {
+    private Text francetiers$modifyPlayerName(Text original, PlayerListEntry entry) {
         ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
         if (!config.enabled || !config.showInTabList) {
             return original;
@@ -32,7 +32,7 @@ public class MixinPlayerListHud {
 
         PlayerInfoCache.CachedEntry cached = PlayerInfoCache.get(pseudo);
         if (cached != null && cached.result == PlayerInfoCache.Result.FOUND) {
-            String prefix = ShowedTier.showed_tier(cached.info);
+            String prefix = ShowedTier.showed_tier(cached.info, config);
             if (prefix != null && !prefix.isEmpty()) {
                 net.minecraft.text.MutableText nameText = net.minecraft.text.Text.empty();
                 

@@ -3,6 +3,7 @@ package nerd.amara;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
+import nerd.amara.tiers.GamemodeType;
 
 @Config(name = "francetiers_tagger")
 public class ModConfig implements ConfigData {
@@ -12,7 +13,7 @@ public class ModConfig implements ConfigData {
 
     @ConfigEntry.Category("general")
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-    public Gamemode gamemode = Gamemode.ALL;
+    public GamemodeType gamemode = GamemodeType.ALL;
 
     @ConfigEntry.Category("display")
     public boolean showInNametag = true;
@@ -51,27 +52,13 @@ public class ModConfig implements ConfigData {
         }
     }
 
-    public enum Gamemode {
-        ALL("All"),
-        CRYSTAL("Crystal"),
-        SWORD("Sword"),
-        UHC("UHC"),
-        POT("Pot"),
-        NETHPOT("NethPot"),
-        SMP("SMP"),
-        AXE("Axe"),
-        DIASMP("DiaSMP"),
-        MACE("Mace"),
-        MOD_OFF("Mod Off");
-
-        private final String displayName;
-
-        Gamemode(String displayName) {
-            this.displayName = displayName;
+    @Override
+    public void validatePostLoad() {
+        if (gamemode == null) {
+            gamemode = GamemodeType.ALL;
         }
-
-        public String getDisplayName() {
-            return displayName;
+        if (tierPosition == null) {
+            tierPosition = TierPosition.RIGHT;
         }
     }
 }

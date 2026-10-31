@@ -2,16 +2,20 @@ package nerd.amara;
 
 import me.shedaniel.autoconfig.AutoConfig;
 import nerd.amara.tiers.PlayerInfo;
+import nerd.amara.tiers.Tier;
 import net.fabricmc.api.ClientModInitializer;
 
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,14 +26,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class Francetiers_tagger implements ClientModInitializer {
 	public static final String MOD_ID = "francetiers_tagger";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-	public static String web_url="https://francetiers.fr/search_playerV2.php?pseudo=";
+	public static String web_url = "https://francetiers.fr/search_playerV2.php?pseudo=";
 	public static CopyOnWriteArrayList<DisplayEntity.TextDisplayEntity> TextDisplayList = new CopyOnWriteArrayList<>();
 	public static ConcurrentHashMap<DisplayEntity.TextDisplayEntity, Text> OriginalTextMap = new ConcurrentHashMap<>();
 
 	@Override
 	public void onInitializeClient() {
 		Keybinds.registerKeybinds();
-		me.shedaniel.autoconfig.AutoConfig.register(ModConfig.class, me.shedaniel.autoconfig.serializer.GsonConfigSerializer::new);
+		AutoConfig.register(ModConfig.class, me.shedaniel.autoconfig.serializer.GsonConfigSerializer::new);
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
 			CommandManager.registerCommands(dispatcher);
 		});
@@ -38,70 +42,59 @@ public class Francetiers_tagger implements ClientModInitializer {
 			TextDisplayList.clear();
 			OriginalTextMap.clear();
 			PlayerInfoCache.clear();
+			TierSuffixCache.clear();
 		});
 
 		AutoConfig.getConfigHolder(ModConfig.class).registerSaveListener((manager, data) -> {
-			if (net.minecraft.client.MinecraftClient.getInstance().world != null) {
-				for (Entity entity : net.minecraft.client.MinecraftClient.getInstance().world.getEntities()) {
+			TierSuffixCache.clear();
+			if (MinecraftClient.getInstance().world != null) {
+				for (Entity entity : MinecraftClient.getInstance().world.getEntities()) {
 					if (entity instanceof PlayerEntity player) {
 						String pseudo = player.getName().getString();
 						PlayerInfoCache.CachedEntry cached = PlayerInfoCache.get(pseudo);
 						if (cached != null && cached.result == PlayerInfoCache.Result.FOUND) {
-							((TierModifier) player).setSuffix(ShowedTier.showed_tier(cached.info));
+							String newSuffix = ShowedTier.showed_tier(cached.info, data);
+							((TierModifier) player).setSuffix(newSuffix);
+							TierSuffixCache.putSuffix(pseudo, newSuffix);
 							for (Entity passenger : player.getPassengerList()) {
 								if (passenger instanceof DisplayEntity.TextDisplayEntity textDisplay) {
-									if (textDisplay.getText().getString().contains(pseudo)) {
-										setTextInTextDisplay(cached.info, textDisplay, pseudo);
-									}
+									updateTextDisplay(textDisplay);
 								}
 							}
 						}
 					}
 				}
 			}
-			return net.minecraft.util.ActionResult.SUCCESS;
+			return ActionResult.SUCCESS;
 		});
 
 		ClientEntityEvents.ENTITY_LOAD.register(((entity, clientWorld) -> {
-			if (entity instanceof PlayerEntity) {
-				if (((TierModifier) entity).getSuffix() == null) {
-					String pseudo = entity.getName().getString();
-					RequestManager.fetchPlayerInfo(pseudo,
-							(PlayerInfo info) -> {
-								((TierModifier) entity).setSuffix(ShowedTier.showed_tier(info));
-								for (Entity passenger : entity.getPassengerList()) {
-									if (passenger instanceof DisplayEntity.TextDisplayEntity textDisplay) {
-										TextDisplayList.addIfAbsent(textDisplay);
-										if (textDisplay.getText().getString().contains(pseudo)) {
-											setTextInTextDisplay(info, textDisplay, pseudo);
-										}
-									}
+			if (entity instanceof PlayerEntity player) {
+				String pseudo = player.getName().getString();
+				RequestManager.fetchPlayerInfo(pseudo,
+						(PlayerInfo info) -> {
+							String suffix = ShowedTier.showed_tier(info);
+							((TierModifier) player).setSuffix(suffix);
+							TierSuffixCache.putSuffix(pseudo, suffix);
+							for (Entity passenger : player.getPassengerList()) {
+								if (passenger instanceof DisplayEntity.TextDisplayEntity textDisplay) {
+									TextDisplayList.addIfAbsent(textDisplay);
+									updateTextDisplay(textDisplay);
 								}
-							},
-							(Http.Status status) -> {
-								if (status == Http.Status.NOT_FOUND) {
-									LOGGER.debug("{} n'est pas classé sur FranceTiers", pseudo);
-								} else {
-									LOGGER.warn("Impossible de récupérer le tier de {} ({})", pseudo, status);
-								}
-							});
-				}
+							}
+						},
+						(Http.Status status) -> {
+							if (status == Http.Status.NOT_FOUND) {
+								LOGGER.debug("{} n'est pas classé sur FranceTiers", pseudo);
+							} else {
+								LOGGER.warn("Impossible de récupérer le tier de {} ({})", pseudo, status);
+							}
+						});
 			} else if (entity instanceof DisplayEntity.TextDisplayEntity textDisplay) {
 				Entity vehicle = textDisplay.getVehicle();
 				if (vehicle instanceof PlayerEntity player) {
 					TextDisplayList.addIfAbsent(textDisplay);
-					String pseudo = player.getName().getString();
-					if (textDisplay.getText().getString().contains(pseudo)) {
-						RequestManager.fetchPlayerInfo(pseudo,
-								(PlayerInfo info) -> setTextInTextDisplay(info, textDisplay, pseudo),
-								(Http.Status status) -> {
-									if (status == Http.Status.NOT_FOUND) {
-										LOGGER.debug("{} n'est pas classé sur FranceTiers", pseudo);
-									} else {
-										LOGGER.warn("Impossible de récupérer le tier de {} ({})", pseudo, status);
-									}
-								});
-					}
+					updateTextDisplay(textDisplay);
 				}
 			}
 		}));
@@ -113,44 +106,33 @@ public class Francetiers_tagger implements ClientModInitializer {
 			}
 		});
 
-		ClientTickEvents.END_WORLD_TICK.register((world)->{
+		ClientTickEvents.END_WORLD_TICK.register(world -> {
 			for (DisplayEntity.TextDisplayEntity textDisplay : TextDisplayList) {
 				if (textDisplay.isRemoved()) {
 					TextDisplayList.remove(textDisplay);
 					OriginalTextMap.remove(textDisplay);
 					continue;
 				}
-				if (!FontConstants.hasTierFont(textDisplay.getText())){
+				if (!FontConstants.hasTierFont(textDisplay.getText())) {
 					OriginalTextMap.put(textDisplay, textDisplay.getText());
-					Entity vehicle = textDisplay.getVehicle();
-					if (vehicle instanceof PlayerEntity player) {
-						String pseudo = player.getName().getString();
-						if (textDisplay.getText().getString().contains(pseudo)) {
-							PlayerInfoCache.CachedEntry cached = PlayerInfoCache.get(pseudo);
-							if (cached != null && cached.result == PlayerInfoCache.Result.FOUND) {
-								setTextInTextDisplay(cached.info, textDisplay, pseudo);
-							}
-						}
-					}
+					updateTextDisplay(textDisplay);
 				}
 			}
-		});
 
-		ClientTickEvents.END_WORLD_TICK.register(clientWorld -> {
 			ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
 			if (!config.enabled || !config.showParticles) return;
 
-			for (PlayerEntity player : clientWorld.getPlayers()) {
+			for (PlayerEntity player : world.getPlayers()) {
 				if (player.isInvisible()) continue;
 
 				String pseudo = player.getName().getString();
 				PlayerInfoCache.CachedEntry cached = PlayerInfoCache.get(pseudo);
 				if (cached != null && cached.result == PlayerInfoCache.Result.FOUND) {
-					nerd.amara.tiers.Tier tierObj = ShowedTier.getDisplayedTierObj(cached.info);
+					Tier tierObj = ShowedTier.getDisplayedTierObj(cached.info, config);
 					if (tierObj != null && tierObj.tier != null) {
 						if (tierObj.tier.equals("HT1") || tierObj.tier.equals("RHT1")) {
 							if (Math.random() < 0.2) {
-								clientWorld.addParticleClient(net.minecraft.particle.ParticleTypes.END_ROD, 
+								world.addParticleClient(ParticleTypes.END_ROD, 
 									player.getX() + (Math.random() - 0.5) * 1.5, 
 									player.getY() + Math.random() * 2.0, 
 									player.getZ() + (Math.random() - 0.5) * 1.5, 
@@ -158,7 +140,7 @@ public class Francetiers_tagger implements ClientModInitializer {
 							}
 						} else if (tierObj.tier.equals("LT1") || tierObj.tier.equals("RLT1")) {
 							if (Math.random() < 0.1) {
-								clientWorld.addParticleClient(net.minecraft.particle.ParticleTypes.ENCHANT, 
+								world.addParticleClient(ParticleTypes.ENCHANT, 
 									player.getX() + (Math.random() - 0.5) * 1.2, 
 									player.getY() + Math.random() * 2.0, 
 									player.getZ() + (Math.random() - 0.5) * 1.2, 
@@ -171,6 +153,24 @@ public class Francetiers_tagger implements ClientModInitializer {
 		});
 
 		LOGGER.info("france tiers tagger initialized");
+	}
+
+	public static void updateTextDisplay(DisplayEntity.TextDisplayEntity textDisplay) {
+		if (textDisplay.isRemoved()) {
+			TextDisplayList.remove(textDisplay);
+			OriginalTextMap.remove(textDisplay);
+			return;
+		}
+		Entity vehicle = textDisplay.getVehicle();
+		if (vehicle instanceof PlayerEntity player) {
+			String pseudo = player.getName().getString();
+			if (textDisplay.getText().getString().contains(pseudo)) {
+				PlayerInfoCache.CachedEntry cached = PlayerInfoCache.get(pseudo);
+				if (cached != null && cached.result == PlayerInfoCache.Result.FOUND) {
+					setTextInTextDisplay(cached.info, textDisplay, pseudo);
+				}
+			}
+		}
 	}
 
 	public static Text setSuffixTextDisplay(Text original, String suffix, String pseudo){

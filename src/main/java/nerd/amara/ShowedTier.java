@@ -1,94 +1,38 @@
 package nerd.amara;
 
+import me.shedaniel.autoconfig.AutoConfig;
+import nerd.amara.tiers.GamemodeType;
 import nerd.amara.tiers.PlayerInfo;
 import nerd.amara.tiers.Tier;
+import nerd.amara.tiers.TierRank;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public class ShowedTier {
-    private static Map<String,Integer> importance=Map.ofEntries(
-            Map.entry("N/A", 0),
-            Map.entry("LT6", 1),
-            Map.entry("HT6", 2),
-            Map.entry("LT5", 3),
-            Map.entry("HT5", 4),
-            Map.entry("LT4", 5),
-            Map.entry("HT4", 6),
-            Map.entry("LT3", 7),
-            Map.entry("HT3", 8),
-            Map.entry("RLT2", 9),
-            Map.entry("LT2", 10),
-            Map.entry("RHT2", 11),
-            Map.entry("HT2", 12),
-            Map.entry("RLT1", 13),
-            Map.entry("LT1", 14),
-            Map.entry("RHT1", 15),
-            Map.entry("HT1", 16)
-    );
-    private static Map<String,String> tiers_emoji=Map.ofEntries(
-            Map.entry("N/A", ""),
-            Map.entry("LT5", "\uEE00"),
-            Map.entry("HT5", "\uEE01"),
-            Map.entry("LT4", "\uEE02"),
-            Map.entry("HT4", "\uEE03"),
-            Map.entry("LT3", "\uEE04"),
-            Map.entry("HT3", "\uEE05"),
-            Map.entry("LT2", "\uEE06"),
-            Map.entry("HT2", "\uEE07"),
-            Map.entry("LT1", "\uEE08"),
-            Map.entry("HT1", "\uEE09"),
-            Map.entry("RLT2", "\uEE0a"),
-            Map.entry("RHT2", "\uEE0b"),
-            Map.entry("RLT1", "\uEE0c"),
-            Map.entry("RHT1", "\uEE0d")
-    );
-    private static String getGamemodeChar(String category, int level) {
-        int offset = switch (category) {
-            case "Mace" -> 0;
-            case "SMP" -> 1;
-            case "UHC" -> 2;
-            case "Pot" -> 3;
-            case "Crystal", "Vanilla" -> 4;
-            case "Sword" -> 5;
-            case "DiaSMP" -> 6;
-            case "NethPot" -> 7;
-            case "Axe" -> 8;
-            default -> -1;
-        };
-        if (offset == -1) return "";
-        int base = switch (level) {
-            case 5 -> 0xEC00;
-            case 4 -> 0xEC10;
-            case 3 -> 0xEC20;
-            case 2 -> 0xEC30;
-            case 1 -> 0xEC40;
-            default -> 0xEF00;
-        };
-        return String.valueOf((char) (base + offset));
+
+    public static Tier getDisplayedTierObj(PlayerInfo info) {
+        ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+        return getDisplayedTierObj(info, config);
     }
 
-    public static Tier getDisplayedTierObj(PlayerInfo info){
-        ModConfig config = me.shedaniel.autoconfig.AutoConfig.getConfigHolder(ModConfig.class).getConfig();
-        ModConfig.Gamemode currentMode = config.gamemode;
-        if (currentMode == null) {
-            currentMode = ModConfig.Gamemode.ALL;
-            config.gamemode = currentMode;
-        }
-        if (!config.enabled || currentMode == ModConfig.Gamemode.MOD_OFF){
-            return null;
-        }
-        if (info==null){
+    public static Tier getDisplayedTierObj(PlayerInfo info, ModConfig config) {
+        if (config == null || !config.enabled || info == null) {
             return null;
         }
 
-        if (currentMode != ModConfig.Gamemode.ALL) {
+        GamemodeType currentMode = config.gamemode != null ? config.gamemode : GamemodeType.ALL;
+        if (currentMode == GamemodeType.MOD_OFF) {
+            return null;
+        }
+
+        if (currentMode != GamemodeType.ALL) {
             String targetMode = currentMode.getDisplayName();
             if (info.tiers != null) {
                 Tier specific = info.tiers.get(targetMode);
-                if (specific == null && (targetMode.equals("Crystal") || targetMode.equals("Vanilla"))) {
-                    specific = info.tiers.get(targetMode.equals("Crystal") ? "Vanilla" : "Crystal");
+                if (specific == null && currentMode == GamemodeType.CRYSTAL) {
+                    specific = info.tiers.get("Vanilla");
                 }
                 if (specific != null && !Objects.equals(specific.tier, "N/A")) {
                     return specific;
@@ -97,8 +41,7 @@ public class ShowedTier {
             if (info.retired_tiers != null) {
                 for (Tier element : info.retired_tiers) {
                     if (Objects.equals(element.category, targetMode) ||
-                       ((targetMode.equals("Crystal") || targetMode.equals("Vanilla")) &&
-                        (Objects.equals(element.category, "Crystal") || Objects.equals(element.category, "Vanilla")))) {
+                       (currentMode == GamemodeType.CRYSTAL && Objects.equals(element.category, "Vanilla"))) {
                         return element;
                     }
                 }
@@ -115,7 +58,7 @@ public class ShowedTier {
                     return bestRetired;
                 }
                 Tier bestActive = info.tiers.get(bestActiveKey);
-                if (importance.getOrDefault(bestRetired.tier, -1) > importance.getOrDefault(bestActive.tier, -1)) {
+                if (TierRank.fromCode(bestRetired.tier).getImportance() > TierRank.fromCode(bestActive.tier).getImportance()) {
                     return bestRetired;
                 }
             }
@@ -127,49 +70,25 @@ public class ShowedTier {
         return null;
     }
 
-    public static String showed_tier(PlayerInfo info){
-        Tier best = getDisplayedTierObj(info);
+    public static String showed_tier(PlayerInfo info) {
+        ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+        return showed_tier(info, config);
+    }
+
+    public static String showed_tier(PlayerInfo info, ModConfig config) {
+        Tier best = getDisplayedTierObj(info, config);
         if (best != null) {
-            return formatBadge(best.tier, best.category);
+            return formatBadge(best.tier, best.category, config);
         }
         return "";
     }
 
-    public static String showed_message(PlayerInfo info){
-        if (info.tiers==null) {
-            return "JOUEUR NON CLASSÉ";
-        }
-        String msg="";
-        msg=msg+"\ued09 FRANCETIERS \ued09\nPLAYER: "+info.pseudo+"\nTOP "+info.global_rank+" ("+info.total_points+" points) \nTIERS:";
-        boolean hasTier=false;
-        for (String key : info.tiers.keySet()) {
-            Tier value = info.tiers.get(key);
-            if (!Objects.equals(value.tier, "N/A")){
-                msg=msg+"\n      "+formatBadge(value.tier,key)+" "+key;
-                hasTier=true;
-            }
-        }
-        if (!hasTier){
-            return "JOUEUR NON CLASSÉ";
-        }
-        return msg;
-    }
-
-    private static String formatBadge(String tier, String category) {
-        int imp = importance.getOrDefault(tier, -1);
-        int level = 0;
-        if (imp >= 0 && imp < 5) level = 5;
-        else if (imp >= 5 && imp < 7) level = 4;
-        else if (imp >= 7 && imp < 9) level = 3;
-        else if (imp >= 9 && imp < 13) level = 2;
-        else if (imp >= 13) level = 1;
-        
-        ModConfig config = me.shedaniel.autoconfig.AutoConfig.getConfigHolder(ModConfig.class).getConfig();
-        if (config.oldIcons) {
-            level = 0;
-        }
-        String gamemodeChar = config.showKitIcon ? getGamemodeChar(category, level) : "";
-        return tiers_emoji.getOrDefault(tier, "") + "\uF804" + gamemodeChar;
+    private static String formatBadge(String tier, String category, ModConfig config) {
+        TierRank rank = TierRank.fromCode(tier);
+        int level = (config != null && config.oldIcons) ? 0 : rank.getLevel();
+        GamemodeType mode = GamemodeType.fromName(category);
+        String gamemodeChar = (config != null && config.showKitIcon) ? mode.getGamemodeChar(level) : "";
+        return rank.getEmoji() + "\uF804" + gamemodeChar;
     }
 
     private static String bestActiveGamemode(Map<String, Tier> tiers) {
@@ -179,7 +98,7 @@ public class ShowedTier {
             if (Objects.equals(tier, "N/A")) {
                 continue;
             }
-            if (best == null || importance.getOrDefault(tiers.get(best).tier, -1) < importance.getOrDefault(tier, -1)) {
+            if (best == null || TierRank.fromCode(tiers.get(best).tier).getImportance() < TierRank.fromCode(tier).getImportance()) {
                 best = key;
             }
         }
@@ -190,7 +109,7 @@ public class ShowedTier {
         Integer best = null;
         for (int i = 0; i < retiredTiers.size(); i++) {
             String tier = retiredTiers.get(i).tier;
-            if (best == null || importance.getOrDefault(retiredTiers.get(best).tier, -1) < importance.getOrDefault(tier, -1)) {
+            if (best == null || TierRank.fromCode(retiredTiers.get(best).tier).getImportance() < TierRank.fromCode(tier).getImportance()) {
                 best = i;
             }
         }

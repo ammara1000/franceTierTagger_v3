@@ -10,7 +10,6 @@ import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.entity.player.PlayerEntity;
-
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import me.shedaniel.autoconfig.AutoConfig;
@@ -71,7 +70,7 @@ public class CommandManager {
 
     private static void handleShowTier(String name) {
         if (name == null || name.isBlank()) {
-            sendSimpleError("Merci d'indiquer un pseudo, ex: /francetiers show <pseudo>");
+            sendSimpleError(Text.translatable("francetiers_tagger.command.error.specify_name_show"));
             return;
         }
         RequestManager.fetchPlayerInfo(name,
@@ -80,21 +79,22 @@ public class CommandManager {
                         MinecraftClient.getInstance().setScreen(new TierScreen(info));
                     });
                 },
-                (Http.Status status) -> sendTwoTone("Erreur (" + name + "): ", Formatting.RED, describeError(status)));
+                (Http.Status status) -> sendTwoTone(Text.translatable("francetiers_tagger.command.error.prefix", name), Formatting.RED, describeError(status)));
     }
 
     private static void handleRefresh(String name) {
         if (name == null || name.isBlank()) {
-            sendSimpleError("Merci d'indiquer un pseudo, ex: /francetiers refresh <pseudo>");
+            sendSimpleError(Text.translatable("francetiers_tagger.command.error.specify_name_refresh"));
             return;
         }
         RequestManager.forcePlayerInfoRefresh(name,
                 (PlayerInfo info) -> {
-                    sendTwoTone("Tier actualisé pour ", Formatting.GREEN, name);
+                    sendTwoTone(Text.translatable("francetiers_tagger.command.refresh.success"), Formatting.GREEN, Text.literal(name));
                     MinecraftClient.getInstance().execute(() -> {
                         MinecraftClient client = MinecraftClient.getInstance();
+                        String newSuffix = ShowedTier.showed_tier(info);
+                        TierSuffixCache.putSuffix(name, newSuffix);
                         if (client.world != null) {
-                            String newSuffix = ShowedTier.showed_tier(info);
                             for (PlayerEntity player : client.world.getPlayers()) {
                                 if (player.getName().getString().equalsIgnoreCase(name)) {
                                     ((TierModifier) player).setSuffix(newSuffix);
@@ -110,35 +110,31 @@ public class CommandManager {
                         client.setScreen(new TierScreen(info));
                     });
                 },
-                (Http.Status status) -> sendTwoTone("Erreur (" + name + "): ", Formatting.RED, describeError(status)),
-                (Long remainingSeconds) -> sendTwoTone("Attends encore " + remainingSeconds + "s avant de réactualiser ", Formatting.YELLOW, name));
+                (Http.Status status) -> sendTwoTone(Text.translatable("francetiers_tagger.command.error.prefix", name), Formatting.RED, describeError(status)),
+                (Long remainingSeconds) -> sendTwoTone(Text.translatable("francetiers_tagger.command.refresh.cooldown", remainingSeconds), Formatting.YELLOW, Text.literal(name)));
     }
 
     private static void sendMessage(Text text) {
         MinecraftClient.getInstance().player.sendMessage(text, false);
     }
 
-    private static void sendSimpleError(String message) {
-        sendMessage(Text.literal(message).styled(s -> s.withColor(Formatting.RED)));
+    private static void sendSimpleError(Text message) {
+        sendMessage(message.copy().styled(s -> s.withColor(Formatting.RED)));
     }
 
-    private static void sendTwoTone(String prefix, Formatting prefixColor, String detail) {
-        sendMessage(Text.literal(prefix).styled(s -> s.withColor(prefixColor))
-                .append(Text.literal(detail).styled(s -> s.withColor(Formatting.WHITE))));
+    private static void sendTwoTone(Text prefix, Formatting prefixColor, Text detail) {
+        sendMessage(prefix.copy().styled(s -> s.withColor(prefixColor))
+                .append(Text.literal(" "))
+                .append(detail.copy().styled(s -> s.withColor(Formatting.WHITE))));
     }
 
-    private static void sendTierMessage(PlayerInfo info) {
-        ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
-        sendMessage(Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(FontConstants.getActiveFont(config))));
-    }
-
-    private static String describeError(Http.Status status) {
+    private static Text describeError(Http.Status status) {
         return switch (status) {
-            case NOT_FOUND -> "joueur introuvable";
-            case SERVER_ERROR -> "le serveur FranceTiers ne répond pas correctement, réessaie plus tard";
-            case NETWORK_ERROR -> "impossible de contacter FranceTiers, vérifie ta connexion";
-            case PARSE_ERROR -> "réponse invalide reçue de FranceTiers";
-            default -> "erreur inconnue";
+            case NOT_FOUND -> Text.translatable("francetiers_tagger.error.not_found");
+            case SERVER_ERROR -> Text.translatable("francetiers_tagger.error.server");
+            case NETWORK_ERROR -> Text.translatable("francetiers_tagger.error.network");
+            case PARSE_ERROR -> Text.translatable("francetiers_tagger.error.parse");
+            default -> Text.translatable("francetiers_tagger.error.unknown");
         };
     }
 

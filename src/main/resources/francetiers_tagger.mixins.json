@@ -3,7 +3,6 @@
 	"package": "nerd.amara.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ExampleMixin",
 		"MixinPlayerEntity",
 		"MixinPlayerListHud",
 		"MixinEntity"

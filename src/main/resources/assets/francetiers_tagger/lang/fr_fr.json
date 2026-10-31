@@ -26,5 +26,20 @@
   "text.autoconfig.francetiers_tagger.option.tierPosition.RIGHT": "Droite",
   "key.mod.change_gamemode": "Changer le Gamemode",
   "key.mod.open_tier_screen": "Afficher les stats du joueur",
-  "key.category.minecraft.francetierstagger": "FranceTiers Tagger"
+  "key.category.minecraft.francetierstagger": "FranceTiers Tagger",
+  "francetiers_tagger.command.error.specify_name_show": "Merci d'indiquer un pseudo, ex: /francetiers show <pseudo>",
+  "francetiers_tagger.command.error.specify_name_refresh": "Merci d'indiquer un pseudo, ex: /francetiers refresh <pseudo>",
+  "francetiers_tagger.command.error.prefix": "Erreur (%s):",
+  "francetiers_tagger.command.refresh.success": "Tier actualisé pour",
+  "francetiers_tagger.command.refresh.cooldown": "Attends encore %ss avant de réactualiser",
+  "francetiers_tagger.error.not_found": "joueur introuvable",
+  "francetiers_tagger.error.server": "le serveur FranceTiers ne répond pas correctement, réessaie plus tard",
+  "francetiers_tagger.error.network": "impossible de contacter FranceTiers, vérifie ta connexion",
+  "francetiers_tagger.error.parse": "réponse invalide reçue de FranceTiers",
+  "francetiers_tagger.error.unknown": "erreur inconnue",
+  "francetiers_tagger.screen.profile_title": "Profil de %s",
+  "francetiers_tagger.screen.loading": "Chargement...",
+  "francetiers_tagger.screen.global_rank": "Global: %s",
+  "francetiers_tagger.screen.points": "Points: %s",
+  "francetiers_tagger.message.gamemode_selected": "Gamemode sélectionné : %s"
 }

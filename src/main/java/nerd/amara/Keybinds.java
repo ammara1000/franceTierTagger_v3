@@ -1,5 +1,6 @@
 package nerd.amara;
 
+import nerd.amara.tiers.GamemodeType;
 import nerd.amara.tiers.PlayerInfo;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -15,15 +16,12 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
-
-import java.util.List;
-
 import static nerd.amara.Francetiers_tagger.setTextInTextDisplay;
-
 
 public class Keybinds {
     private static KeyBinding change_gamemode;
     private static KeyBinding open_tier_screen;
+
     public static void registerKeybinds(){
         KeyBinding.Category category = KeyBinding.Category.create(Identifier.of("francetierstagger"));
         
@@ -43,11 +41,12 @@ public class Keybinds {
             while (change_gamemode.wasPressed()){
                 me.shedaniel.autoconfig.ConfigHolder<ModConfig> holder = me.shedaniel.autoconfig.AutoConfig.getConfigHolder(ModConfig.class);
                 ModConfig config = holder.getConfig();
-                ModConfig.Gamemode[] values = ModConfig.Gamemode.values();
+                GamemodeType[] values = GamemodeType.values();
                 int nextIndex = (config.gamemode.ordinal() + 1) % values.length;
                 config.gamemode = values[nextIndex];
                 holder.save();
-                MinecraftClient.getInstance().player.sendMessage(Text.literal("Gamemode Selected: ").append(Text.literal(config.gamemode.getDisplayName()).styled(s->s.withColor(Formatting.AQUA))),true);
+                TierSuffixCache.clear();
+                MinecraftClient.getInstance().player.sendMessage(Text.translatable("francetiers_tagger.message.gamemode_selected", Text.literal(config.gamemode.getDisplayName()).styled(s -> s.withColor(Formatting.AQUA))), true);
                 ClientWorld world = MinecraftClient.getInstance().world;
 
                 if (world != null) {

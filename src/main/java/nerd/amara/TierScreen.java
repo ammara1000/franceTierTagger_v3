@@ -1,85 +1,37 @@
 package nerd.amara;
 
+import nerd.amara.tiers.GamemodeType;
 import nerd.amara.tiers.PlayerInfo;
-import nerd.amara.tiers.Tier;
+import nerd.amara.tiers.TierRank;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.util.Identifier;
+import net.minecraft.text.Style;
+import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+
 import java.io.ByteArrayInputStream;
 import java.time.Duration;
+import java.util.HashSet;
 import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public class TierScreen extends Screen {
 
     private final PlayerInfo playerInfo;
-
     private Identifier playerAvatarId;
     private boolean avatarLoaded = false;
     
-    private static final java.util.Set<String> REGISTERED_AVATARS = new java.util.HashSet<>();
-    
-    private String getGamemodeIconChar(String tierText, String mode) {
-        if (tierText.equals("-") || tierText.equals("N/A")) return "";
-        
-        int imp = -1;
-        if (tierText.equals("LT6")) imp = 1;
-        else if (tierText.equals("HT6")) imp = 2;
-        else if (tierText.equals("LT5")) imp = 3;
-        else if (tierText.equals("HT5")) imp = 4;
-        else if (tierText.equals("LT4")) imp = 5;
-        else if (tierText.equals("HT4")) imp = 6;
-        else if (tierText.equals("LT3")) imp = 7;
-        else if (tierText.equals("HT3")) imp = 8;
-        else if (tierText.equals("RLT2")) imp = 9;
-        else if (tierText.equals("LT2")) imp = 10;
-        else if (tierText.equals("RHT2")) imp = 11;
-        else if (tierText.equals("HT2")) imp = 12;
-        else if (tierText.equals("RLT1")) imp = 13;
-        else if (tierText.equals("LT1")) imp = 14;
-        else if (tierText.equals("RHT1")) imp = 15;
-        else if (tierText.equals("HT1")) imp = 16;
-        
-        int level = 0;
-        if (imp >= 0 && imp < 5) level = 5;
-        else if (imp >= 5 && imp < 7) level = 4;
-        else if (imp >= 7 && imp < 9) level = 3;
-        else if (imp >= 9 && imp < 13) level = 2;
-        else if (imp >= 13) level = 1;
-        
-        String cleanMode = mode.toLowerCase(Locale.ROOT).replaceAll("[\\s_-]+", "");
-        int offset = -1;
-        if (cleanMode.equals("mace")) offset = 0;
-        else if (cleanMode.equals("smp")) offset = 1;
-        else if (cleanMode.equals("uhc")) offset = 2;
-        else if (cleanMode.equals("pot")) offset = 3;
-        else if (cleanMode.equals("crystal") || cleanMode.equals("vanilla")) offset = 4;
-        else if (cleanMode.equals("sword")) offset = 5;
-        else if (cleanMode.equals("diasmp") || cleanMode.equals("diamond")) offset = 6;
-        else if (cleanMode.equals("nethpot")) offset = 7;
-        else if (cleanMode.equals("axe")) offset = 8;
-        
-        if (offset == -1) return "";
-        
-        int base = 0xEF00;
-        if (level == 5) base = 0xEC00;
-        else if (level == 4) base = 0xEC10;
-        else if (level == 3) base = 0xEC20;
-        else if (level == 2) base = 0xEC30;
-        else if (level == 1) base = 0xEC40;
-        
-        return String.valueOf((char) (base + offset));
-    }
+    private static final Set<String> REGISTERED_AVATARS = new HashSet<>();
 
     public TierScreen(PlayerInfo playerInfo) {
-        super(Text.literal("Profil de " + playerInfo.pseudo));
+        super(Text.translatable("francetiers_tagger.screen.profile_title", playerInfo.pseudo));
         this.playerInfo = playerInfo;
         
         CompletableFuture.runAsync(() -> {
@@ -142,10 +94,10 @@ public class TierScreen extends Screen {
         if (this.avatarLoaded && this.playerAvatarId != null) {
             context.drawTexture(net.minecraft.client.gl.RenderPipelines.GUI_TEXTURED, this.playerAvatarId, startX + 23, startY + 40, 0f, 0f, 54, 120, 54, 120);
         } else {
-            context.drawCenteredTextWithShadow(this.textRenderer, "Chargement...", startX + 50, startY + 100, 0xFFAAAAAA);
+            context.drawCenteredTextWithShadow(this.textRenderer, Text.translatable("francetiers_tagger.screen.loading"), startX + 50, startY + 100, 0xFFAAAAAA);
         }
 
-        String titleText = "Profil de " + playerInfo.pseudo;
+        Text titleText = Text.translatable("francetiers_tagger.screen.profile_title", playerInfo.pseudo);
         int titleWidth = this.textRenderer.getWidth(titleText);
         
         if (playerInfo.region != null && !playerInfo.region.isEmpty()) {
@@ -181,8 +133,8 @@ public class TierScreen extends Screen {
         String rankStr = playerInfo.global_rank != null ? "#" + playerInfo.global_rank : "-";
         String ptsStr = playerInfo.total_points != null ? playerInfo.total_points : "0";
         
-        context.drawTextWithShadow(this.textRenderer, "Global: " + rankStr, startX + 15, startY + windowHeight - 20, 0xFFAAAAAA);
-        context.drawTextWithShadow(this.textRenderer, "Points: " + ptsStr, startX + windowWidth - 75, startY + windowHeight - 20, 0xFF55FF55);
+        context.drawTextWithShadow(this.textRenderer, Text.translatable("francetiers_tagger.screen.global_rank", rankStr), startX + 15, startY + windowHeight - 20, 0xFFAAAAAA);
+        context.drawTextWithShadow(this.textRenderer, Text.translatable("francetiers_tagger.screen.points", ptsStr), startX + windowWidth - 75, startY + windowHeight - 20, 0xFF55FF55);
 
         String[] row1 = {"Dia SMP", "Pot", "Nethpot", "SMP"};
         String[] row2 = {"Sword", "Vanilla", "Axe", "UHC"};
@@ -202,40 +154,39 @@ public class TierScreen extends Screen {
         for (int i = 0; i < modes.length; i++) {
             String mode = modes[i];
             int x = startX + i * spacing;
+            GamemodeType modeType = GamemodeType.fromName(mode);
             
             String tierText = "-";
             if (playerInfo.tiers != null) {
                 for (Map.Entry<String, nerd.amara.tiers.Tier> entry : playerInfo.tiers.entrySet()) {
-                    String cleanKey = entry.getKey().toLowerCase(Locale.ROOT).replaceAll("[\\s_-]+", "");
-                    String cleanMode = mode.toLowerCase(Locale.ROOT).replaceAll("[\\s_-]+", "");
-                    if (cleanKey.equals(cleanMode)) {
+                    if (GamemodeType.fromName(entry.getKey()) == modeType) {
                         tierText = entry.getValue().tier;
                         break;
                     }
                 }
             }
             
-            Text iconText = getIconForMode(mode);
+            Text iconText = modeType.getIconText();
             int iconWidth = this.textRenderer.getWidth(iconText);
             
             context.drawText(this.textRenderer, iconText, x - iconWidth / 2, y, 0xFFFFFFFF, false);
             
+            TierRank rank = TierRank.fromCode(tierText);
             Text badgeText;
-            if (tierText.equals("-") || tierText.equals("N/A")) {
+            if (rank == TierRank.NA) {
                 badgeText = Text.literal("-");
             } else {
-                String iconChar = getGamemodeIconChar(tierText, mode);
+                String iconChar = modeType.getGamemodeChar(rank.getLevel());
                 if (!iconChar.isEmpty()) {
                     badgeText = Text.empty()
-                        .append(Text.literal(iconChar).setStyle(net.minecraft.text.Style.EMPTY.withFont(new net.minecraft.text.StyleSpriteSource.Font(net.minecraft.util.Identifier.of("frtl", "lol_small")))))
+                        .append(Text.literal(iconChar).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(FontConstants.FONT_SMALL_ID))))
                         .append(Text.literal(" " + tierText));
                 } else {
                     badgeText = Text.literal(tierText);
                 }
             }
             
-            int tierColor = getTierColor(tierText);
-            drawBadge(context, x, y + 16, badgeText, tierColor);
+            drawBadge(context, x, y + 16, badgeText, rank.getColor());
         }
     }
 
@@ -265,41 +216,5 @@ public class TierScreen extends Screen {
     @Override
     public boolean shouldPause() {
         return false;
-    }
-
-    private Text getIconForMode(String modeName) {
-        if (modeName == null) return Text.empty();
-        String lower = modeName.toLowerCase(Locale.ROOT).replaceAll("[\\s_-]+", "");
-        
-        String unicode = "\uF005";
-        net.minecraft.util.Identifier fontId = net.minecraft.util.Identifier.of("frtl", "gamemodes/mctiers");
-        
-        if (lower.contains("crystal") || lower.contains("vanilla")) unicode = "\uF000";
-        else if (lower.contains("uhc")) unicode = "\uF001";
-        else if (lower.contains("nethpot")) unicode = "\uF003";
-        else if (lower.contains("pot")) unicode = "\uF002";
-        else if (lower.contains("axe")) unicode = "\uF006";
-        else if (lower.contains("mace")) unicode = "\uF007";
-        else if (lower.contains("diasmp") || lower.contains("diamond")) {
-            unicode = "\uF007";
-            fontId = net.minecraft.util.Identifier.of("frtl", "gamemodes/subtiers");
-        }
-        else if (lower.contains("smp")) unicode = "\uF004";
-        
-        return Text.literal(unicode).setStyle(net.minecraft.text.Style.EMPTY.withFont(new net.minecraft.text.StyleSpriteSource.Font(fontId)).withColor(0xFFFFFFFF));
-    }
-
-    private int getTierColor(String tier) {
-        if (tier == null || tier.equals("-") || tier.equals("N/A")) return 0xFF1F202A;
-        if (tier.startsWith("HT1") || tier.startsWith("RHT1")) return 0xFFFFD700;
-        if (tier.startsWith("LT1") || tier.startsWith("RLT1")) return 0xFFFFD700;
-        if (tier.startsWith("HT2") || tier.startsWith("RHT2")) return 0xFF3399FF;
-        if (tier.startsWith("LT2") || tier.startsWith("RLT2")) return 0xFF3399FF;
-        if (tier.startsWith("HT3")) return 0xFFFF8C00;
-        if (tier.startsWith("LT3")) return 0xFFD98A44;
-        if (tier.startsWith("HT4")) return 0xFF8A7272;
-        if (tier.startsWith("LT4")) return 0xFF8A7272;
-        if (tier.startsWith("HT5") || tier.startsWith("LT5")) return 0xFF505A69;
-        return 0xFFAAAAAA;
     }
 }
