@@ -85,9 +85,16 @@ public class ShowedTier {
 
     private static String formatBadge(String tier, String category, ModConfig config) {
         TierRank rank = TierRank.fromCode(tier);
-        int level = (config != null && config.oldIcons) ? 0 : rank.getLevel();
+        boolean isOld = (config != null && config.oldIcons);
+        int level = isOld ? 0 : rank.getLevel();
         GamemodeType mode = GamemodeType.fromName(category);
         String gamemodeChar = (config != null && config.showKitIcon) ? mode.getGamemodeChar(level) : "";
+        if (gamemodeChar.isEmpty()) {
+            return rank.getEmoji();
+        }
+        if (isOld) {
+            return rank.getEmoji() + gamemodeChar;
+        }
         return rank.getEmoji() + "\uF804" + gamemodeChar;
     }
 

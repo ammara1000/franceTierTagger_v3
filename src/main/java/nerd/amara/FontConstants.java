@@ -9,15 +9,19 @@ public class FontConstants {
     public static final Identifier FONT_REGULAR_ID = Identifier.of("frtl", "lol");
     public static final Identifier FONT_SMALL_ID = Identifier.of("frtl", "lol_small");
     public static final Identifier FONT_OLD_ID = Identifier.of("frtl", "lol_old");
+    public static final Identifier FONT_OLD_SMALL_ID = Identifier.of("frtl", "lol_old_small");
 
     public static final StyleSpriteSource.Font FONT_REGULAR = new StyleSpriteSource.Font(FONT_REGULAR_ID);
     public static final StyleSpriteSource.Font FONT_SMALL = new StyleSpriteSource.Font(FONT_SMALL_ID);
     public static final StyleSpriteSource.Font FONT_OLD = new StyleSpriteSource.Font(FONT_OLD_ID);
+    public static final StyleSpriteSource.Font FONT_OLD_SMALL = new StyleSpriteSource.Font(FONT_OLD_SMALL_ID);
 
     public static StyleSpriteSource.Font getActiveFont(ModConfig config) {
-        if (config.smallIcons) return FONT_SMALL;
-        if (config.oldIcons) return FONT_OLD;
-        return FONT_REGULAR;
+        if (config == null) return FONT_REGULAR;
+        if (config.oldIcons) {
+            return config.smallIcons ? FONT_OLD_SMALL : FONT_OLD;
+        }
+        return config.smallIcons ? FONT_SMALL : FONT_REGULAR;
     }
 
     public static boolean hasTierFont(Text text) {
@@ -40,6 +44,6 @@ public class FontConstants {
 
     public static boolean isTierFontId(Identifier id) {
         if (id == null) return false;
-        return id.equals(FONT_REGULAR_ID) || id.equals(FONT_SMALL_ID) || id.equals(FONT_OLD_ID);
+        return id.equals(FONT_REGULAR_ID) || id.equals(FONT_SMALL_ID) || id.equals(FONT_OLD_ID) || id.equals(FONT_OLD_SMALL_ID);
     }
 }

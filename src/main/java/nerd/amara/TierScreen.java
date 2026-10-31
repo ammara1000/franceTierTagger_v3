@@ -1,5 +1,6 @@
 package nerd.amara;
 
+import me.shedaniel.autoconfig.AutoConfig;
 import nerd.amara.tiers.GamemodeType;
 import nerd.amara.tiers.PlayerInfo;
 import nerd.amara.tiers.TierRank;
@@ -209,7 +210,9 @@ public class TierScreen extends Screen {
                 }
             }
             
-            Text iconText = modeType.getIconText();
+            ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+            boolean isOld = config != null && config.oldIcons;
+            Text iconText = modeType.getIconText(isOld);
             int iconWidth = this.textRenderer.getWidth(iconText);
             
             context.drawText(this.textRenderer, iconText, x - iconWidth / 2, y, 0xFFFFFFFF, false);
@@ -219,10 +222,12 @@ public class TierScreen extends Screen {
             if (rank == TierRank.NA) {
                 badgeText = Text.literal("-");
             } else {
-                String iconChar = modeType.getGamemodeChar(rank.getLevel());
+                int level = isOld ? 0 : rank.getLevel();
+                Identifier badgeFontId = isOld ? FontConstants.FONT_OLD_SMALL_ID : FontConstants.FONT_SMALL_ID;
+                String iconChar = modeType.getGamemodeChar(level);
                 if (!iconChar.isEmpty()) {
                     badgeText = Text.empty()
-                        .append(Text.literal(iconChar).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(FontConstants.FONT_SMALL_ID))))
+                        .append(Text.literal(iconChar).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(badgeFontId))))
                         .append(Text.literal(" " + tierText));
                 } else {
                     badgeText = Text.literal(tierText);

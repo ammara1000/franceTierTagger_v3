@@ -64,10 +64,20 @@ public enum GamemodeType {
     }
 
     public Text getIconText() {
+        return getIconText(false);
+    }
+
+    public Text getIconText(boolean old) {
         if (iconFontId == null || iconChar.isEmpty()) {
             return Text.empty();
         }
-        return Text.literal(iconChar).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(iconFontId)).withColor(0xFFFFFFFF));
+        Identifier fontId = iconFontId;
+        if (old) {
+            fontId = this == DIASMP
+                ? Identifier.of("frtl", "gamemodes/old_subtiers")
+                : Identifier.of("frtl", "gamemodes/old");
+        }
+        return Text.literal(iconChar).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(fontId)).withColor(0xFFFFFFFF));
     }
 
     public static GamemodeType fromName(String name) {

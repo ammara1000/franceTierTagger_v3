@@ -21,7 +21,7 @@ public class UpdateNotification {
     public static final int HEIGHT = 20;
     private static final int DURATION_MS = 5000;
     private static final int ANIM_MS = 350;
-    private static final float TEXT_SCALE = 0.60f;
+    private static final float TEXT_SCALE = 0.65f;
 
     private static int currentRenderedX = -1000;
     private static float animatedY = 8f;
@@ -92,12 +92,15 @@ public class UpdateNotification {
 
     public static int getWidth() {
         MinecraftClient client = MinecraftClient.getInstance();
+        if (client == null || client.textRenderer == null) {
+            return 120;
+        }
         Text title = getTitle();
         Text sub = getSubtitle();
         int tWidth = client.textRenderer.getWidth(title);
         int sWidth = client.textRenderer.getWidth(sub);
         int maxTextWidth = Math.round(Math.max(tWidth, sWidth) * TEXT_SCALE);
-        return maxTextWidth + 24;
+        return maxTextWidth + 26;
     }
 
     public static void render(DrawContext context, int mouseX, int mouseY) {

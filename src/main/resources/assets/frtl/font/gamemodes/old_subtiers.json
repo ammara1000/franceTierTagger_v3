@@ -1,0 +1,11 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "frtl:font/gamemodes/old/diasmp.png",
+      "height": 12,
+      "ascent": 12,
+      "chars": ["\uF007"]
+    }
+  ]
+}
