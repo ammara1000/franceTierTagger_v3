@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
 
 public class Http {
     private static final Logger LOGGER = LoggerFactory.getLogger("FranceTiersHttp");
-    private static final String USER_AGENT = "FranceTiersTagger/1.0.0";
+    private static final String USER_AGENT = "FranceTiersTagger/2.5.3";
 
     private static final ExecutorService HTTP_EXECUTOR = Executors.newFixedThreadPool(4, r -> {
         Thread t = new Thread(r, "francetiers-http");
@@ -102,6 +102,20 @@ public class Http {
                 .GET()
                 .build();
         HttpResponse<byte[]> response = client.send(request, HttpResponse.BodyHandlers.ofByteArray());
+        if (response.statusCode() == 200) {
+            return response.body();
+        }
+        throw new IOException("HTTP " + response.statusCode());
+    }
+
+    public static String getString(String url, Duration timeout) throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("User-Agent", USER_AGENT)
+                .timeout(timeout)
+                .GET()
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 200) {
             return response.body();
         }

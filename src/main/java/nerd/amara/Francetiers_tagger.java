@@ -9,7 +9,11 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -36,6 +40,36 @@ public class Francetiers_tagger implements ClientModInitializer {
 		AutoConfig.register(ModConfig.class, me.shedaniel.autoconfig.serializer.GsonConfigSerializer::new);
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
 			CommandManager.registerCommands(dispatcher);
+		});
+
+		UpdateChecker.checkAsync();
+
+		HudRenderCallback.EVENT.register((drawContext, renderTickCounter) -> {
+			if (MinecraftClient.getInstance().currentScreen == null) {
+				UpdateNotification.triggerPendingIfAny();
+				UpdateNotification.render(drawContext, -1, -1);
+			}
+		});
+
+		ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+			int btnW = UpdateNotification.getWidth();
+			int btnX = scaledWidth - btnW - 8;
+			ButtonWidget updateBtn = ButtonWidget.builder(Text.empty(), b -> {
+				if (UpdateNotification.isVisible()) {
+					UpdateNotification.openModrinth();
+				}
+			}).dimensions(btnX, 8, btnW, UpdateNotification.HEIGHT).build();
+			updateBtn.setAlpha(0f);
+			Screens.getButtons(screen).add(updateBtn);
+
+			ScreenEvents.afterRender(screen).register((scr, drawContext, mouseX, mouseY, delta) -> {
+				int curW = UpdateNotification.getWidth();
+				updateBtn.setX(UpdateNotification.getX());
+				updateBtn.setY(UpdateNotification.getY());
+				updateBtn.setWidth(curW);
+				updateBtn.visible = UpdateNotification.isVisible();
+				UpdateNotification.render(drawContext, mouseX, mouseY);
+			});
 		});
 
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {

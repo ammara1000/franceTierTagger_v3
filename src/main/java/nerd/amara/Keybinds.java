@@ -21,63 +21,56 @@ import static nerd.amara.Francetiers_tagger.setTextInTextDisplay;
 public class Keybinds {
     private static KeyBinding change_gamemode;
     private static KeyBinding open_tier_screen;
+    private static KeyBinding auto_detect_kit;
 
-    public static void registerKeybinds(){
+    public static void registerKeybinds() {
         KeyBinding.Category category = KeyBinding.Category.create(Identifier.of("francetierstagger"));
-        
-        change_gamemode=KeyBindingHelper.registerKeyBinding(new KeyBinding(
+
+        change_gamemode = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.mod.change_gamemode",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_UNKNOWN,
                 category
         ));
-        open_tier_screen=KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        open_tier_screen = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.mod.open_tier_screen",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_K,
                 category
         ));
+        auto_detect_kit = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.mod.auto_detect_kit",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_Y,
+                category
+        ));
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (change_gamemode.wasPressed()){
+            while (auto_detect_kit.wasPressed()) {
+                InventoryChecker.checkInventory(client, true);
+            }
+
+            while (change_gamemode.wasPressed()) {
                 me.shedaniel.autoconfig.ConfigHolder<ModConfig> holder = me.shedaniel.autoconfig.AutoConfig.getConfigHolder(ModConfig.class);
                 ModConfig config = holder.getConfig();
                 GamemodeType[] values = GamemodeType.values();
                 int nextIndex = (config.gamemode.ordinal() + 1) % values.length;
                 config.gamemode = values[nextIndex];
                 holder.save();
-                TierSuffixCache.clear();
-                MinecraftClient.getInstance().player.sendMessage(Text.translatable("francetiers_tagger.message.gamemode_selected", Text.literal(config.gamemode.getDisplayName()).styled(s -> s.withColor(Formatting.AQUA))), true);
-                ClientWorld world = MinecraftClient.getInstance().world;
-
-                if (world != null) {
-                    for (AbstractClientPlayerEntity player : world.getPlayers()) {
-                        String pseudo = player.getName().getString();
-                        RequestManager.fetchPlayerInfo(pseudo,
-                                (PlayerInfo info) -> {
-                                    ((TierModifier) player).setSuffix(ShowedTier.showed_tier(info));
-                                    if (!player.getPassengerList().isEmpty()) {
-                                        for (Entity i : player.getPassengerList()) {
-                                            if (i instanceof DisplayEntity.TextDisplayEntity textDisplay) {
-                                                if (textDisplay.getText().getString().contains(pseudo)) {
-                                                    setTextInTextDisplay(info, textDisplay, pseudo);
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                null);
-                    }
+                refreshAllPlayerTags();
+                if (client.player != null) {
+                    client.player.sendMessage(Text.translatable("francetiers_tagger.message.gamemode_selected", Text.literal(config.gamemode.getDisplayName()).styled(s -> s.withColor(Formatting.AQUA))), true);
                 }
             }
 
             while (open_tier_screen.wasPressed()) {
-                ClientWorld world = MinecraftClient.getInstance().world;
-                if (world != null && MinecraftClient.getInstance().player != null) {
+                ClientWorld world = client.world;
+                if (world != null && client.player != null) {
                     AbstractClientPlayerEntity closestPlayer = null;
                     double closestDistance = 50.0 * 50.0;
                     for (AbstractClientPlayerEntity player : world.getPlayers()) {
-                        if (player == MinecraftClient.getInstance().player) continue;
-                        double distance = player.squaredDistanceTo(MinecraftClient.getInstance().player);
+                        if (player == client.player) continue;
+                        double distance = player.squaredDistanceTo(client.player);
                         if (distance < closestDistance) {
                             closestDistance = distance;
                             closestPlayer = player;
@@ -86,13 +79,37 @@ public class Keybinds {
                     if (closestPlayer != null) {
                         String pseudo = closestPlayer.getName().getString();
                         RequestManager.fetchPlayerInfo(pseudo, (PlayerInfo info) -> {
-                            MinecraftClient.getInstance().execute(() -> {
-                                MinecraftClient.getInstance().setScreen(new TierScreen(info));
+                            client.execute(() -> {
+                                client.setScreen(new TierScreen(info));
                             });
                         }, null);
                     }
                 }
             }
         });
+    }
+
+    public static void refreshAllPlayerTags() {
+        TierSuffixCache.clear();
+        ClientWorld world = MinecraftClient.getInstance().world;
+        if (world != null) {
+            for (AbstractClientPlayerEntity player : world.getPlayers()) {
+                String pseudo = player.getName().getString();
+                RequestManager.fetchPlayerInfo(pseudo,
+                        (PlayerInfo info) -> {
+                            ((TierModifier) player).setSuffix(ShowedTier.showed_tier(info));
+                            if (!player.getPassengerList().isEmpty()) {
+                                for (Entity i : player.getPassengerList()) {
+                                    if (i instanceof DisplayEntity.TextDisplayEntity textDisplay) {
+                                        if (textDisplay.getText().getString().contains(pseudo)) {
+                                            setTextInTextDisplay(info, textDisplay, pseudo);
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        null);
+            }
+        }
     }
 }

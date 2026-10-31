@@ -2,6 +2,7 @@
   "text.autoconfig.francetiers_tagger.title": "FranceTiers Configuration",
   "text.autoconfig.francetiers_tagger.category.general": "General",
   "text.autoconfig.francetiers_tagger.option.enabled": "Enable Mod",
+  "text.autoconfig.francetiers_tagger.option.checkForUpdates": "Check for Updates",
   "text.autoconfig.francetiers_tagger.category.display": "Display",
   "text.autoconfig.francetiers_tagger.option.showInNametag": "Show in Nametag",
   "text.autoconfig.francetiers_tagger.option.showInTabList": "Show in Tab List",
@@ -26,6 +27,7 @@
   "text.autoconfig.francetiers_tagger.option.tierPosition.RIGHT": "Right",
   "key.mod.change_gamemode": "Change Gamemode",
   "key.mod.open_tier_screen": "Show Player Stats",
+  "key.mod.auto_detect_kit": "Auto Detect Kit",
   "key.category.minecraft.francetierstagger": "FranceTiers Tagger",
   "francetiers_tagger.command.error.specify_name_show": "Please specify a player name, ex: /francetiers show <player>",
   "francetiers_tagger.command.error.specify_name_refresh": "Please specify a player name, ex: /francetiers refresh <player>",
@@ -41,5 +43,11 @@
   "francetiers_tagger.screen.loading": "Loading...",
   "francetiers_tagger.screen.global_rank": "Global: %s",
   "francetiers_tagger.screen.points": "Points: %s",
-  "francetiers_tagger.message.gamemode_selected": "Gamemode Selected: %s"
+  "francetiers_tagger.message.gamemode_selected": "Gamemode Selected: %s",
+  "francetiers_tagger.update.title": "FranceTiers Tagger %s is available",
+  "francetiers_tagger.update.subtitle": "Version %s installed. Type /frtl update",
+  "francetiers_tagger.kit.detected": "Kit detected: %s",
+  "francetiers_tagger.kit.not_found": "No PvP gamemode detected",
+  "francetiers_tagger.screen.peak_tier": "Peak Tier: %s",
+  "francetiers_tagger.screen.peak_points": "Points: %s"
 }

@@ -12,6 +12,9 @@ public class ModConfig implements ConfigData {
     public boolean enabled = true;
 
     @ConfigEntry.Category("general")
+    public boolean checkForUpdates = true;
+
+    @ConfigEntry.Category("general")
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
     public GamemodeType gamemode = GamemodeType.ALL;
 

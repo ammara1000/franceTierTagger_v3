@@ -56,6 +56,16 @@ public class CommandManager {
                                 MinecraftClient.getInstance().setScreen(AutoConfig.getConfigScreen(ModConfig.class, MinecraftClient.getInstance().currentScreen).get());
                             });
                             return 1;
+                        }))
+                .then(literal("kit")
+                        .executes(context -> {
+                            InventoryChecker.checkInventory(MinecraftClient.getInstance(), true);
+                            return 1;
+                        }))
+                .then(literal("update")
+                        .executes(context -> {
+                            UpdateNotification.openModrinth();
+                            return 1;
                         }));
 
         dispatcher.register(francetiersCmd);
