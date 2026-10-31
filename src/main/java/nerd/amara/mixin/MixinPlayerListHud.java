@@ -2,6 +2,7 @@ package nerd.amara.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import me.shedaniel.autoconfig.AutoConfig;
+import nerd.amara.FontConstants;
 import nerd.amara.ModConfig;
 import nerd.amara.RequestManager;
 import nerd.amara.ShowedTier;
@@ -11,24 +12,16 @@ import net.minecraft.client.network.PlayerListEntry;
 
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(PlayerListHud.class)
 public class MixinPlayerListHud {
-    @Unique
-    private static final net.minecraft.text.StyleSpriteSource.Font FRTL_FONT = new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol"));
-    @Unique
-    private static final net.minecraft.text.StyleSpriteSource.Font SMALL_FRTL_FONT = new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol_small"));
-    @Unique
-    private static final net.minecraft.text.StyleSpriteSource.Font OLD_FRTL_FONT = new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol_old"));
 
     @ModifyReturnValue(method = "getPlayerName", at = @At("RETURN"))
     public Text modifyPlayerName(Text original, PlayerListEntry entry) {
-        ModConfig config = me.shedaniel.autoconfig.AutoConfig.getConfigHolder(ModConfig.class).getConfig();
-        if (!config.showInTabList) {
+        ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+        if (!config.enabled || !config.showInTabList) {
             return original;
         }
 
@@ -43,7 +36,7 @@ public class MixinPlayerListHud {
             if (prefix != null && !prefix.isEmpty()) {
                 net.minecraft.text.MutableText nameText = net.minecraft.text.Text.empty();
                 
-                net.minecraft.text.MutableText tierComponent = net.minecraft.text.Text.literal(prefix).styled(s -> s.withColor(Formatting.WHITE).withFont(config.smallIcons ? SMALL_FRTL_FONT : config.oldIcons ? OLD_FRTL_FONT : FRTL_FONT));
+                net.minecraft.text.MutableText tierComponent = net.minecraft.text.Text.literal(prefix).styled(s -> s.withColor(Formatting.WHITE).withFont(FontConstants.getActiveFont(config)));
                 
                 if (config.tierPosition == ModConfig.TierPosition.RIGHT) {
                     nameText.append(original != null ? original : net.minecraft.text.Text.literal(pseudo));
@@ -62,4 +55,3 @@ public class MixinPlayerListHud {
         return original != null ? original : Text.literal(pseudo);
     }
 }
-

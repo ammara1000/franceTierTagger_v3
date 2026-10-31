@@ -9,10 +9,10 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.Identifier;
 import net.minecraft.text.Text;
 import java.net.URL;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.io.InputStream;
 import java.util.Map;
@@ -54,7 +54,7 @@ public class TierScreen extends Screen {
         else if (imp >= 9 && imp < 13) level = 2;
         else if (imp >= 13) level = 1;
         
-        String cleanMode = mode.toLowerCase().replace(" ", "");
+        String cleanMode = mode.toLowerCase(Locale.ROOT).replaceAll("[\\s_-]+", "");
         int offset = -1;
         if (cleanMode.equals("mace")) offset = 0;
         else if (cleanMode.equals("smp")) offset = 1;
@@ -62,7 +62,7 @@ public class TierScreen extends Screen {
         else if (cleanMode.equals("pot")) offset = 3;
         else if (cleanMode.equals("crystal") || cleanMode.equals("vanilla")) offset = 4;
         else if (cleanMode.equals("sword")) offset = 5;
-        else if (cleanMode.equals("diasmp")) offset = 6;
+        else if (cleanMode.equals("diasmp") || cleanMode.equals("diamond")) offset = 6;
         else if (cleanMode.equals("nethpot")) offset = 7;
         else if (cleanMode.equals("axe")) offset = 8;
         
@@ -78,8 +78,6 @@ public class TierScreen extends Screen {
         return String.valueOf((char) (base + offset));
     }
 
-    private net.minecraft.client.network.OtherClientPlayerEntity dummyPlayer;
-
     public TierScreen(PlayerInfo playerInfo) {
         super(Text.literal("Profil de " + playerInfo.pseudo));
         this.playerInfo = playerInfo;
@@ -91,7 +89,7 @@ public class TierScreen extends Screen {
                 try (InputStream is = url.openStream()) {
                     NativeImage image = NativeImage.read(is);
                     MinecraftClient.getInstance().execute(() -> {
-                        String avatarStr = "avatar_" + playerInfo.pseudo.toLowerCase();
+                        String avatarStr = "avatar_" + playerInfo.pseudo.toLowerCase(Locale.ROOT);
                         this.playerAvatarId = Identifier.of("tier", avatarStr);
                         if (!REGISTERED_AVATARS.contains(avatarStr)) {
                             NativeImageBackedTexture texture = new NativeImageBackedTexture(() -> avatarStr, image);
@@ -151,7 +149,7 @@ public class TierScreen extends Screen {
         int titleWidth = this.textRenderer.getWidth(titleText);
         
         if (playerInfo.region != null && !playerInfo.region.isEmpty()) {
-            String regionText = playerInfo.region.toUpperCase();
+            String regionText = playerInfo.region.toUpperCase(Locale.ROOT);
             int regionWidth = this.textRenderer.getWidth(regionText);
             int badgeWidth = regionWidth + 8;
             int badgeHeight = 12;
@@ -208,8 +206,8 @@ public class TierScreen extends Screen {
             String tierText = "-";
             if (playerInfo.tiers != null) {
                 for (Map.Entry<String, nerd.amara.tiers.Tier> entry : playerInfo.tiers.entrySet()) {
-                    String cleanKey = entry.getKey().toLowerCase().replace(" ", "");
-                    String cleanMode = mode.toLowerCase().replace(" ", "");
+                    String cleanKey = entry.getKey().toLowerCase(Locale.ROOT).replaceAll("[\\s_-]+", "");
+                    String cleanMode = mode.toLowerCase(Locale.ROOT).replaceAll("[\\s_-]+", "");
                     if (cleanKey.equals(cleanMode)) {
                         tierText = entry.getValue().tier;
                         break;
@@ -271,7 +269,7 @@ public class TierScreen extends Screen {
 
     private Text getIconForMode(String modeName) {
         if (modeName == null) return Text.empty();
-        String lower = modeName.toLowerCase();
+        String lower = modeName.toLowerCase(Locale.ROOT).replaceAll("[\\s_-]+", "");
         
         String unicode = "\uF005";
         net.minecraft.util.Identifier fontId = net.minecraft.util.Identifier.of("frtl", "gamemodes/mctiers");
@@ -282,11 +280,11 @@ public class TierScreen extends Screen {
         else if (lower.contains("pot")) unicode = "\uF002";
         else if (lower.contains("axe")) unicode = "\uF006";
         else if (lower.contains("mace")) unicode = "\uF007";
-        else if (lower.contains("smp") && !lower.contains("dia")) unicode = "\uF004";
         else if (lower.contains("diasmp") || lower.contains("diamond")) {
             unicode = "\uF007";
             fontId = net.minecraft.util.Identifier.of("frtl", "gamemodes/subtiers");
         }
+        else if (lower.contains("smp")) unicode = "\uF004";
         
         return Text.literal(unicode).setStyle(net.minecraft.text.Style.EMPTY.withFont(new net.minecraft.text.StyleSpriteSource.Font(fontId)).withColor(0xFFFFFFFF));
     }

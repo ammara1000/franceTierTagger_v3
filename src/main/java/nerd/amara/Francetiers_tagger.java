@@ -10,23 +10,21 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Box;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Francetiers_tagger implements ClientModInitializer {
 	public static final String MOD_ID = "francetiers_tagger";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static String web_url="https://francetiers.fr/search_playerV2.php?pseudo=";
-	public static java.util.concurrent.CopyOnWriteArrayList<DisplayEntity.TextDisplayEntity> TextDisplayList = new java.util.concurrent.CopyOnWriteArrayList<>();
-	public static java.util.concurrent.ConcurrentHashMap<DisplayEntity.TextDisplayEntity, Text> OriginalTextMap = new java.util.concurrent.ConcurrentHashMap<>();
+	public static CopyOnWriteArrayList<DisplayEntity.TextDisplayEntity> TextDisplayList = new CopyOnWriteArrayList<>();
+	public static ConcurrentHashMap<DisplayEntity.TextDisplayEntity, Text> OriginalTextMap = new ConcurrentHashMap<>();
 
 	@Override
 	public void onInitializeClient() {
@@ -109,7 +107,7 @@ public class Francetiers_tagger implements ClientModInitializer {
 					OriginalTextMap.remove(textDisplay);
 					continue;
 				}
-				if (!textDisplay.getText().getString().contains("\uF804")){
+				if (!FontConstants.hasTierFont(textDisplay.getText())){
 					OriginalTextMap.put(textDisplay, textDisplay.getText());
 					Entity vehicle = textDisplay.getVehicle();
 					if (vehicle instanceof PlayerEntity player) {
@@ -125,9 +123,9 @@ public class Francetiers_tagger implements ClientModInitializer {
 			}
 		});
 
-		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_WORLD_TICK.register(clientWorld -> {
+		ClientTickEvents.END_WORLD_TICK.register(clientWorld -> {
 			ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
-			if (!config.showParticles) return;
+			if (!config.enabled || !config.showParticles) return;
 
 			for (PlayerEntity player : clientWorld.getPlayers()) {
 				if (player.isInvisible()) continue;
@@ -162,43 +160,29 @@ public class Francetiers_tagger implements ClientModInitializer {
 		LOGGER.info("france tiers tagger initialized");
 	}
 
-	private static final StyleSpriteSource.Font FRTL_FONT = new StyleSpriteSource.Font(Identifier.of("frtl", "lol"));
-	private static final StyleSpriteSource.Font SMALL_FRTL_FONT = new StyleSpriteSource.Font(Identifier.of("frtl", "lol_small"));
-	private static final StyleSpriteSource.Font OLD_FRTL_FONT = new StyleSpriteSource.Font(Identifier.of("frtl", "old_small"));
-
 	public static Text setSuffixTextDisplay(Text original, String suffix, String pseudo){
 		ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
-		if (config.showInNametag && suffix != null) {
-			if (!Objects.equals(suffix, "")) {
-				Text suffixText;
-				if (config.smallIcons) {
-					suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(SMALL_FRTL_FONT));
-				} else if (config.oldIcons) {
-					suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(OLD_FRTL_FONT));
-				} else {
-					suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT));
-				}
+		if (!config.enabled || !config.showInNametag || suffix == null || suffix.isEmpty()) {
+			return original;
+		}
 
-				if (config.tierPosition == ModConfig.TierPosition.LEFT) {
-					return Text.empty().append(suffixText.copy()).append(Text.literal(" ")).append(original.copy());
-				} else {
-					return Text.empty().append(original.copy()).append(Text.literal(" ")).append(suffixText);
-				}
-			}
+		Text suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FontConstants.getActiveFont(config)));
+
+		if (config.tierPosition == ModConfig.TierPosition.LEFT) {
+			return Text.empty().append(suffixText.copy()).append(Text.literal(" ")).append(original.copy());
+		} else {
+			return Text.empty().append(original.copy()).append(Text.literal(" ")).append(suffixText);
 		}
-		if (original.getString().contains(pseudo)) {
-			return Text.literal(pseudo);
-		}
-		return original;
 	}
+
 	public static void setTextInTextDisplay(PlayerInfo info, DisplayEntity.TextDisplayEntity textDisplay, String pseudo){
 		Text original = OriginalTextMap.get(textDisplay);
 		if (original == null) {
 			original = textDisplay.getText();
-			if (!original.getString().contains("\uF804")) {
+			if (!FontConstants.hasTierFont(original)) {
 				OriginalTextMap.put(textDisplay, original);
 			}
 		}
-		textDisplay.setText(setSuffixTextDisplay(original,ShowedTier.showed_tier(info),pseudo));
+		textDisplay.setText(setSuffixTextDisplay(original, ShowedTier.showed_tier(info), pseudo));
 	}
 }

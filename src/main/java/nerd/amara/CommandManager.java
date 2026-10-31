@@ -7,10 +7,12 @@ import nerd.amara.tiers.PlayerInfo;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.decoration.DisplayEntity;
+import net.minecraft.entity.player.PlayerEntity;
 
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 import me.shedaniel.autoconfig.AutoConfig;
 
 import java.util.Collection;
@@ -58,7 +60,9 @@ public class CommandManager {
                         }));
 
         dispatcher.register(francetiersCmd);
-        dispatcher.register(literal("frtl").redirect(francetiersCmd.build()));
+        dispatcher.register(literal("frtl")
+                .executes(francetiersCmd.getCommand())
+                .redirect(francetiersCmd.build()));
     }
 
     private static String ownName() {
@@ -88,7 +92,22 @@ public class CommandManager {
                 (PlayerInfo info) -> {
                     sendTwoTone("Tier actualisé pour ", Formatting.GREEN, name);
                     MinecraftClient.getInstance().execute(() -> {
-                        MinecraftClient.getInstance().setScreen(new TierScreen(info));
+                        MinecraftClient client = MinecraftClient.getInstance();
+                        if (client.world != null) {
+                            String newSuffix = ShowedTier.showed_tier(info);
+                            for (PlayerEntity player : client.world.getPlayers()) {
+                                if (player.getName().getString().equalsIgnoreCase(name)) {
+                                    ((TierModifier) player).setSuffix(newSuffix);
+                                }
+                            }
+                        }
+                        for (DisplayEntity.TextDisplayEntity td : Francetiers_tagger.TextDisplayList) {
+                            Entity vehicle = td.getVehicle();
+                            if (vehicle instanceof PlayerEntity player && player.getName().getString().equalsIgnoreCase(name)) {
+                                Francetiers_tagger.setTextInTextDisplay(info, td, name);
+                            }
+                        }
+                        client.setScreen(new TierScreen(info));
                     });
                 },
                 (Http.Status status) -> sendTwoTone("Erreur (" + name + "): ", Formatting.RED, describeError(status)),
@@ -109,13 +128,8 @@ public class CommandManager {
     }
 
     private static void sendTierMessage(PlayerInfo info) {
-        if (AutoConfig.getConfigHolder(ModConfig.class).getConfig().smallIcons){
-            sendMessage(Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol_small")))));
-        } else if (AutoConfig.getConfigHolder(ModConfig.class).getConfig().oldIcons) {
-            sendMessage(Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol_old")))));
-        } else {
-            sendMessage(Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol")))));
-        }
+        ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+        sendMessage(Text.literal(ShowedTier.showed_message(info)).styled(s -> s.withColor(Formatting.WHITE).withFont(FontConstants.getActiveFont(config))));
     }
 
     private static String describeError(Http.Status status) {

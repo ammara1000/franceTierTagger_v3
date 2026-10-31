@@ -1,6 +1,15 @@
 {
   "providers": [
     {
+      "type": "space",
+      "advances": {
+        "\uF801": -1,
+        "\uF802": 2,
+        "\uF804": 4,
+        "\uF808": 8
+      }
+    },
+    {
       "type": "bitmap",
       "file": "frtl:font/gamemode.png",
       "ascent": 8,

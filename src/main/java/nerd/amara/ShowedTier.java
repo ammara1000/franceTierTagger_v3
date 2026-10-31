@@ -50,12 +50,11 @@ public class ShowedTier {
             case "SMP" -> 1;
             case "UHC" -> 2;
             case "Pot" -> 3;
-            case "Crystal" -> 4;
+            case "Crystal", "Vanilla" -> 4;
             case "Sword" -> 5;
             case "DiaSMP" -> 6;
             case "NethPot" -> 7;
             case "Axe" -> 8;
-            case "Vanilla" -> 9;
             default -> -1;
         };
         if (offset == -1) return "";
@@ -138,7 +137,7 @@ public class ShowedTier {
 
     public static String showed_message(PlayerInfo info){
         if (info.tiers==null) {
-            return "JOUEUR NON CLASSÃ‰";
+            return "JOUEUR NON CLASSÉ";
         }
         String msg="";
         msg=msg+"\ued09 FRANCETIERS \ued09\nPLAYER: "+info.pseudo+"\nTOP "+info.global_rank+" ("+info.total_points+" points) \nTIERS:";
@@ -151,7 +150,7 @@ public class ShowedTier {
             }
         }
         if (!hasTier){
-            return "JOUEUR NON CLASSÃ‰";
+            return "JOUEUR NON CLASSÉ";
         }
         return msg;
     }
@@ -166,6 +165,9 @@ public class ShowedTier {
         else if (imp >= 13) level = 1;
         
         ModConfig config = me.shedaniel.autoconfig.AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+        if (config.oldIcons) {
+            level = 0;
+        }
         String gamemodeChar = config.showKitIcon ? getGamemodeChar(category, level) : "";
         return tiers_emoji.getOrDefault(tier, "") + "\uF804" + gamemodeChar;
     }

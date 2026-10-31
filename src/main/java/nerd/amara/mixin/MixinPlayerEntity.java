@@ -2,6 +2,7 @@ package nerd.amara.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import me.shedaniel.autoconfig.AutoConfig;
+import nerd.amara.FontConstants;
 import nerd.amara.ModConfig;
 import nerd.amara.TierModifier;
 import net.minecraft.entity.Entity;
@@ -9,24 +10,13 @@ import net.minecraft.entity.player.PlayerEntity;
 
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-
-import java.util.Objects;
 
 @Mixin(PlayerEntity.class)
 public abstract class MixinPlayerEntity implements TierModifier {
     @Shadow public abstract void remove(Entity.RemovalReason reason);
-
-    @Unique
-    private static final net.minecraft.text.StyleSpriteSource.Font FRTL_FONT = new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol"));
-    @Unique
-    private static final net.minecraft.text.StyleSpriteSource.Font SMALL_FRTL_FONT = new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "lol_small"));
-    @Unique
-    private static final net.minecraft.text.StyleSpriteSource.Font OLD_FRTL_FONT = new net.minecraft.text.StyleSpriteSource.Font(Identifier.of("frtl", "old_small"));
 
     private String suffix = null;
 
@@ -42,25 +32,17 @@ public abstract class MixinPlayerEntity implements TierModifier {
 
     @ModifyReturnValue(method = "getDisplayName", at = @At("RETURN"))
     public Text lol(Text original) {
-        if (suffix != null && me.shedaniel.autoconfig.AutoConfig.getConfigHolder(nerd.amara.ModConfig.class).getConfig().showInNametag) {
-            ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
-            Text suffixText;
-            if (!Objects.equals(suffix, "")) {
-                if (config.smallIcons) {
-                    suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(SMALL_FRTL_FONT));
-                } else if (config.oldIcons) {
-                    suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(OLD_FRTL_FONT));
-                } else {
-                    suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FRTL_FONT));
-                }
-
-                if (config.tierPosition == ModConfig.TierPosition.LEFT) {
-                    return Text.empty().append(suffixText.copy()).append(Text.literal(" ")).append(original.copy());
-                } else {
-                    return Text.empty().append(original.copy()).append(Text.literal(" ")).append(suffixText);
-                }
-            }
+        ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
+        if (!config.enabled || !config.showInNametag || suffix == null || suffix.isEmpty()) {
+            return original;
         }
-        return original;
+
+        Text suffixText = Text.literal(suffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FontConstants.getActiveFont(config)));
+
+        if (config.tierPosition == ModConfig.TierPosition.LEFT) {
+            return Text.empty().append(suffixText.copy()).append(Text.literal(" ")).append(original.copy());
+        } else {
+            return Text.empty().append(original.copy()).append(Text.literal(" ")).append(suffixText);
+        }
     }
 }

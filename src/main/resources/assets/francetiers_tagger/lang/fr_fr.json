@@ -18,8 +18,12 @@
   "text.autoconfig.francetiers_tagger.option.gamemode.MACE": "Mace",
   "text.autoconfig.francetiers_tagger.option.gamemode.MOD_OFF": "Mod Désactivé",
   "text.autoconfig.francetiers_tagger.option.showKitIcon": "Afficher l'icône du Kit",
+  "text.autoconfig.francetiers_tagger.option.showParticles": "Afficher les particules",
   "text.autoconfig.francetiers_tagger.option.smallIcons": "Icônes réduites",
   "text.autoconfig.francetiers_tagger.option.oldIcons": "Anciennes Icônes",
+  "text.autoconfig.francetiers_tagger.option.tierPosition": "Position du tier",
+  "text.autoconfig.francetiers_tagger.option.tierPosition.LEFT": "Gauche",
+  "text.autoconfig.francetiers_tagger.option.tierPosition.RIGHT": "Droite",
   "key.mod.change_gamemode": "Changer le Gamemode",
   "key.mod.open_tier_screen": "Afficher les stats du joueur",
   "key.category.minecraft.francetierstagger": "FranceTiers Tagger"

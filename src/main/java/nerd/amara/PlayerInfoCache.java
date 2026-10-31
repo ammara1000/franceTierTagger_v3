@@ -23,40 +23,44 @@ public class PlayerInfoCache {
         }
     }
 
-    private static class Entry {
+    private static class CacheRecord {
         final CachedEntry cachedEntry;
         final long timestamp;
-        Entry(CachedEntry cachedEntry, long timestamp) {
+        CacheRecord(CachedEntry cachedEntry, long timestamp) {
             this.cachedEntry = cachedEntry;
             this.timestamp = timestamp;
         }
     }
 
-    private static final Map<String, Entry> cache = new LinkedHashMap<>(16, 0.75f, true) {
+    private static final Map<String, CacheRecord> cache = new LinkedHashMap<>(16, 0.75f, true) {
         @Override
-        protected boolean removeEldestEntry(Map.Entry<String, Entry> eldest) {
+        protected boolean removeEldestEntry(Map.Entry<String, CacheRecord> eldest) {
             return size() > MAX_ENTRIES;
         }
     };
 
     public static synchronized CachedEntry get(String pseudo) {
-        Entry entry = cache.get(pseudo);
-        if (entry == null) {
+        CacheRecord record = cache.get(pseudo);
+        if (record == null) {
             return null;
         }
-        if (System.currentTimeMillis() - entry.timestamp > TTL_MILLIS) {
-            cache.remove(pseudo);
-            return null;
+        return record.cachedEntry;
+    }
+
+    public static synchronized boolean isExpired(String pseudo) {
+        CacheRecord record = cache.get(pseudo);
+        if (record == null) {
+            return true;
         }
-        return entry.cachedEntry;
+        return System.currentTimeMillis() - record.timestamp > TTL_MILLIS;
     }
 
     public static synchronized void putFound(String pseudo, PlayerInfo info) {
-        cache.put(pseudo, new Entry(new CachedEntry(Result.FOUND, info), System.currentTimeMillis()));
+        cache.put(pseudo, new CacheRecord(new CachedEntry(Result.FOUND, info), System.currentTimeMillis()));
     }
 
     public static synchronized void putNotFound(String pseudo) {
-        cache.put(pseudo, new Entry(new CachedEntry(Result.NOT_FOUND, null), System.currentTimeMillis()));
+        cache.put(pseudo, new CacheRecord(new CachedEntry(Result.NOT_FOUND, null), System.currentTimeMillis()));
     }
 
     public static synchronized void invalidate(String pseudo) {
