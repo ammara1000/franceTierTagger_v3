@@ -7,6 +7,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,7 +16,6 @@ import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -32,6 +32,12 @@ public class Francetiers_tagger implements ClientModInitializer {
 		me.shedaniel.autoconfig.AutoConfig.register(ModConfig.class, me.shedaniel.autoconfig.serializer.GsonConfigSerializer::new);
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
 			CommandManager.registerCommands(dispatcher);
+		});
+
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			TextDisplayList.clear();
+			OriginalTextMap.clear();
+			PlayerInfoCache.clear();
 		});
 
 		AutoConfig.getConfigHolder(ModConfig.class).registerSaveListener((manager, data) -> {
@@ -99,6 +105,13 @@ public class Francetiers_tagger implements ClientModInitializer {
 				}
 			}
 		}));
+
+		ClientEntityEvents.ENTITY_UNLOAD.register((entity, clientWorld) -> {
+			if (entity instanceof DisplayEntity.TextDisplayEntity textDisplay) {
+				TextDisplayList.remove(textDisplay);
+				OriginalTextMap.remove(textDisplay);
+			}
+		});
 
 		ClientTickEvents.END_WORLD_TICK.register((world)->{
 			for (DisplayEntity.TextDisplayEntity textDisplay : TextDisplayList) {

@@ -11,10 +11,10 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.util.Identifier;
 import net.minecraft.text.Text;
-import java.net.URL;
+import java.io.ByteArrayInputStream;
+import java.time.Duration;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
-import java.io.InputStream;
 import java.util.Map;
 
 public class TierScreen extends Screen {
@@ -85,9 +85,9 @@ public class TierScreen extends Screen {
         CompletableFuture.runAsync(() -> {
             try {
                 String urlStr = "https://mc-heads.net/body/" + playerInfo.pseudo + "/54";
-                URL url = new java.net.URI(urlStr).toURL();
-                try (InputStream is = url.openStream()) {
-                    NativeImage image = NativeImage.read(is);
+                byte[] data = Http.getBytes(urlStr, Duration.ofSeconds(5));
+                try (ByteArrayInputStream bais = new ByteArrayInputStream(data)) {
+                    NativeImage image = NativeImage.read(bais);
                     MinecraftClient.getInstance().execute(() -> {
                         String avatarStr = "avatar_" + playerInfo.pseudo.toLowerCase(Locale.ROOT);
                         this.playerAvatarId = Identifier.of("tier", avatarStr);
