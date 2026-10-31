@@ -11,11 +11,11 @@
 	],
 	"contact": {
 		"homepage": "https://discord.gg/S88xZgmzm2",
-		"sources": "https://github.com/ammara1000/franceTierTagger_v2"
+		"sources": "https://github.com/ammara1000/franceTierTagger_v3"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/francetiers_tagger/icon.png",
-	"environment": "*",
+	"environment": "client",
 	"entrypoints": {
 		"client": [
 			"nerd.amara.Francetiers_tagger"
@@ -25,22 +25,16 @@
 		]
 	},
 	"mixins": [
-		"francetiers_tagger.mixins.json"
+		{
+			"config": "francetiers_tagger.mixins.json",
+			"environment": "client"
+		}
 	],
 	"depends": {
 		"fabricloader": ">=0.15.1",
-		"minecraft": "~1.21.4",
+		"minecraft": "~1.21.11",
 		"java": ">=21",
 		"fabric-api": "*",
 		"cloth-config": "*"
-	},
-	"suggests": {
-		"another-mod": "*"
-	},
-	"client_resources": [
-		{
-			"id": "francetiers_tagger:lol",
-			"enabled": true
-		}
-	]
+	}
 }
