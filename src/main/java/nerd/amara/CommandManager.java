@@ -53,7 +53,7 @@ public class CommandManager {
                 .then(literal("config")
                         .executes(context -> {
                             Minecraft.getInstance().execute(() -> {
-                                Minecraft.getInstance().setScreen(AutoConfigClient.getConfigScreen(ModConfig.class, Minecraft.getInstance().screen).get());
+                                Minecraft.getInstance().gui.setScreen(AutoConfigClient.getConfigScreen(ModConfig.class, Minecraft.getInstance().gui.screen()).get());
                             });
                             return 1;
                         }))
@@ -86,7 +86,7 @@ public class CommandManager {
         RequestManager.fetchPlayerInfo(name,
                 (PlayerInfo info) -> {
                     Minecraft.getInstance().execute(() -> {
-                        Minecraft.getInstance().setScreen(new TierScreen(info));
+                        Minecraft.getInstance().gui.setScreen(new TierScreen(info));
                     });
                 },
                 (Http.Status status) -> sendTwoTone(Component.translatable("francetiers_tagger.command.error.prefix", name), ChatFormatting.RED, describeError(status)));
@@ -117,7 +117,7 @@ public class CommandManager {
                                 Francetiers_tagger.setTextInTextDisplay(info, td, name);
                             }
                         }
-                        client.setScreen(new TierScreen(info));
+                        client.gui.setScreen(new TierScreen(info));
                     });
                 },
                 (Http.Status status) -> sendTwoTone(Component.translatable("francetiers_tagger.command.error.prefix", name), ChatFormatting.RED, describeError(status)),

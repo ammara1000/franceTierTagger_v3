@@ -76,7 +76,7 @@ public class UpdateChecker {
 
                 if (latestRelease != null && isNewer(latestRelease, currentVersion)) {
                     Minecraft client = Minecraft.getInstance();
-                    if (client != null && client.player != null && client.screen == null) {
+                    if (client != null && client.player != null && client.gui.screen() == null) {
                         UpdateNotification.trigger(latestRelease, currentVersion, MODRINTH_PAGE);
                     } else {
                         UpdateNotification.setPending(latestRelease, currentVersion, MODRINTH_PAGE);

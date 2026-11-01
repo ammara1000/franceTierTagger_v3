@@ -46,7 +46,7 @@ public class Francetiers_tagger implements ClientModInitializer {
 		UpdateChecker.checkAsync();
 
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(MOD_ID, "update_notification"), (drawContext, deltaTracker) -> {
-			if (Minecraft.getInstance().screen == null) {
+			if (Minecraft.getInstance().gui.screen() == null) {
 				UpdateNotification.triggerPendingIfAny();
 				UpdateNotification.render(drawContext, -1, -1);
 			}

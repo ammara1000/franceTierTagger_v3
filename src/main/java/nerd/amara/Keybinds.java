@@ -81,7 +81,7 @@ public class Keybinds {
                         String pseudo = closestPlayer.getName().getString();
                         RequestManager.fetchPlayerInfo(pseudo, (PlayerInfo info) -> {
                             client.execute(() -> {
-                                client.setScreen(new TierScreen(info));
+                                client.gui.setScreen(new TierScreen(info));
                             });
                         }, null);
                     }
