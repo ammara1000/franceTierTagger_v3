@@ -4,53 +4,54 @@ import nerd.amara.tiers.GamemodeType;
 import nerd.amara.tiers.PlayerInfo;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.DisplayEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.Entity;
 import org.lwjgl.glfw.GLFW;
 
 import static nerd.amara.Francetiers_tagger.setTextInTextDisplay;
 
+import com.mojang.blaze3d.platform.InputConstants;
+
 public class Keybinds {
-    private static KeyBinding change_gamemode;
-    private static KeyBinding open_tier_screen;
-    private static KeyBinding auto_detect_kit;
+    private static KeyMapping change_gamemode;
+    private static KeyMapping open_tier_screen;
+    private static KeyMapping auto_detect_kit;
 
     public static void registerKeybinds() {
-        KeyBinding.Category category = KeyBinding.Category.create(Identifier.of("francetierstagger"));
+        KeyMapping.Category category = KeyMapping.Category.register(Identifier.parse("francetierstagger"));
 
-        change_gamemode = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        change_gamemode = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.mod.change_gamemode",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_UNKNOWN,
                 category
         ));
-        open_tier_screen = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        open_tier_screen = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.mod.open_tier_screen",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_K,
                 category
         ));
-        auto_detect_kit = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        auto_detect_kit = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.mod.auto_detect_kit",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_Y,
                 category
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (auto_detect_kit.wasPressed()) {
+            while (auto_detect_kit.consumeClick()) {
                 InventoryChecker.checkInventory(client, true);
             }
 
-            while (change_gamemode.wasPressed()) {
+            while (change_gamemode.consumeClick()) {
                 me.shedaniel.autoconfig.ConfigHolder<ModConfig> holder = me.shedaniel.autoconfig.AutoConfig.getConfigHolder(ModConfig.class);
                 ModConfig config = holder.getConfig();
                 GamemodeType[] values = GamemodeType.values();
@@ -59,18 +60,18 @@ public class Keybinds {
                 holder.save();
                 refreshAllPlayerTags();
                 if (client.player != null) {
-                    client.player.sendMessage(Text.translatable("francetiers_tagger.message.gamemode_selected", Text.literal(config.gamemode.getDisplayName()).styled(s -> s.withColor(Formatting.AQUA))), true);
+                    client.player.displayClientMessage(Component.translatable("francetiers_tagger.message.gamemode_selected", Component.literal(config.gamemode.getDisplayName()).withStyle(s -> s.withColor(ChatFormatting.AQUA))), true);
                 }
             }
 
-            while (open_tier_screen.wasPressed()) {
-                ClientWorld world = client.world;
+            while (open_tier_screen.consumeClick()) {
+                ClientLevel world = client.level;
                 if (world != null && client.player != null) {
-                    AbstractClientPlayerEntity closestPlayer = null;
+                    AbstractClientPlayer closestPlayer = null;
                     double closestDistance = 50.0 * 50.0;
-                    for (AbstractClientPlayerEntity player : world.getPlayers()) {
+                    for (AbstractClientPlayer player : world.players()) {
                         if (player == client.player) continue;
-                        double distance = player.squaredDistanceTo(client.player);
+                        double distance = player.distanceToSqr(client.player);
                         if (distance < closestDistance) {
                             closestDistance = distance;
                             closestPlayer = player;
@@ -91,16 +92,16 @@ public class Keybinds {
 
     public static void refreshAllPlayerTags() {
         TierSuffixCache.clear();
-        ClientWorld world = MinecraftClient.getInstance().world;
+        ClientLevel world = Minecraft.getInstance().level;
         if (world != null) {
-            for (AbstractClientPlayerEntity player : world.getPlayers()) {
+            for (AbstractClientPlayer player : world.players()) {
                 String pseudo = player.getName().getString();
                 RequestManager.fetchPlayerInfo(pseudo,
                         (PlayerInfo info) -> {
                             ((TierModifier) player).setSuffix(ShowedTier.showed_tier(info));
-                            if (!player.getPassengerList().isEmpty()) {
-                                for (Entity i : player.getPassengerList()) {
-                                    if (i instanceof DisplayEntity.TextDisplayEntity textDisplay) {
+                            if (!player.getPassengers().isEmpty()) {
+                                for (Entity i : player.getPassengers()) {
+                                    if (i instanceof Display.TextDisplay textDisplay) {
                                         if (textDisplay.getText().getString().contains(pseudo)) {
                                             setTextInTextDisplay(info, textDisplay, pseudo);
                                         }

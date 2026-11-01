@@ -6,14 +6,14 @@ import nerd.amara.FontConstants;
 import nerd.amara.ModConfig;
 import nerd.amara.TierModifier;
 import nerd.amara.TierSuffixCache;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(PlayerEntity.class)
+@Mixin(Player.class)
 public abstract class MixinPlayerEntity implements TierModifier {
 
     @Unique
@@ -30,13 +30,13 @@ public abstract class MixinPlayerEntity implements TierModifier {
     }
 
     @ModifyReturnValue(method = "getDisplayName", at = @At("RETURN"))
-    private Text francetiers$modifyDisplayName(Text original) {
+    private Component francetiers$modifyDisplayName(Component original) {
         ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
         if (!config.enabled || !config.showInNametag) {
             return original;
         }
 
-        String pseudo = ((PlayerEntity) (Object) this).getName().getString();
+        String pseudo = ((Player) (Object) this).getName().getString();
         String currentSuffix = TierSuffixCache.getSuffix(pseudo);
         if (currentSuffix == null || currentSuffix.isEmpty()) {
             currentSuffix = suffix;
@@ -45,12 +45,12 @@ public abstract class MixinPlayerEntity implements TierModifier {
             return original;
         }
 
-        Text suffixText = Text.literal(currentSuffix).styled(s -> s.withColor(Formatting.WHITE).withFont(FontConstants.getActiveFont(config)));
+        Component suffixText = Component.literal(currentSuffix).withStyle(s -> s.withColor(ChatFormatting.WHITE).withFont(FontConstants.getActiveFont(config)));
 
         if (config.tierPosition == ModConfig.TierPosition.LEFT) {
-            return Text.empty().append(suffixText.copy()).append(Text.literal(" ")).append(original.copy());
+            return Component.empty().append(suffixText.copy()).append(Component.literal(" ")).append(original.copy());
         } else {
-            return Text.empty().append(original.copy()).append(Text.literal(" ")).append(suffixText);
+            return Component.empty().append(original.copy()).append(Component.literal(" ")).append(suffixText);
         }
     }
 }

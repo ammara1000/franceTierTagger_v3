@@ -1,22 +1,22 @@
 package nerd.amara;
 
-import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 
 public class FontConstants {
-    public static final Identifier FONT_REGULAR_ID = Identifier.of("frtl", "lol");
-    public static final Identifier FONT_SMALL_ID = Identifier.of("frtl", "lol_small");
-    public static final Identifier FONT_OLD_ID = Identifier.of("frtl", "lol_old");
-    public static final Identifier FONT_OLD_SMALL_ID = Identifier.of("frtl", "lol_old_small");
+    public static final Identifier FONT_REGULAR_ID = Identifier.fromNamespaceAndPath("frtl", "lol");
+    public static final Identifier FONT_SMALL_ID = Identifier.fromNamespaceAndPath("frtl", "lol_small");
+    public static final Identifier FONT_OLD_ID = Identifier.fromNamespaceAndPath("frtl", "lol_old");
+    public static final Identifier FONT_OLD_SMALL_ID = Identifier.fromNamespaceAndPath("frtl", "lol_old_small");
 
-    public static final StyleSpriteSource.Font FONT_REGULAR = new StyleSpriteSource.Font(FONT_REGULAR_ID);
-    public static final StyleSpriteSource.Font FONT_SMALL = new StyleSpriteSource.Font(FONT_SMALL_ID);
-    public static final StyleSpriteSource.Font FONT_OLD = new StyleSpriteSource.Font(FONT_OLD_ID);
-    public static final StyleSpriteSource.Font FONT_OLD_SMALL = new StyleSpriteSource.Font(FONT_OLD_SMALL_ID);
+    public static final FontDescription.Resource FONT_REGULAR = new FontDescription.Resource(FONT_REGULAR_ID);
+    public static final FontDescription.Resource FONT_SMALL = new FontDescription.Resource(FONT_SMALL_ID);
+    public static final FontDescription.Resource FONT_OLD = new FontDescription.Resource(FONT_OLD_ID);
+    public static final FontDescription.Resource FONT_OLD_SMALL = new FontDescription.Resource(FONT_OLD_SMALL_ID);
 
-    public static StyleSpriteSource.Font getActiveFont(ModConfig config) {
+    public static FontDescription.Resource getActiveFont(ModConfig config) {
         if (config == null) return FONT_REGULAR;
         if (config.oldIcons) {
             return config.smallIcons ? FONT_OLD_SMALL : FONT_OLD;
@@ -24,10 +24,10 @@ public class FontConstants {
         return config.smallIcons ? FONT_SMALL : FONT_REGULAR;
     }
 
-    public static boolean hasTierFont(Text text) {
+    public static boolean hasTierFont(Component text) {
         if (text == null) return false;
         if (isTierFont(text.getStyle())) return true;
-        for (Text sibling : text.getSiblings()) {
+        for (Component sibling : text.getSiblings()) {
             if (hasTierFont(sibling)) return true;
         }
         return false;
@@ -35,8 +35,8 @@ public class FontConstants {
 
     private static boolean isTierFont(Style style) {
         if (style == null) return false;
-        StyleSpriteSource source = style.getFont();
-        if (source instanceof StyleSpriteSource.Font font) {
+        FontDescription source = style.getFont();
+        if (source instanceof FontDescription.Resource font) {
             return isTierFontId(font.id());
         }
         return false;

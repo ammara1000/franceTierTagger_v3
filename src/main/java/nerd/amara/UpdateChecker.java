@@ -6,8 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import me.shedaniel.autoconfig.AutoConfig;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-
+import net.minecraft.client.Minecraft;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
@@ -76,8 +75,8 @@ public class UpdateChecker {
                 }
 
                 if (latestRelease != null && isNewer(latestRelease, currentVersion)) {
-                    MinecraftClient client = MinecraftClient.getInstance();
-                    if (client != null && client.player != null && client.currentScreen == null) {
+                    Minecraft client = Minecraft.getInstance();
+                    if (client != null && client.player != null && client.screen == null) {
                         UpdateNotification.trigger(latestRelease, currentVersion, MODRINTH_PAGE);
                     } else {
                         UpdateNotification.setPending(latestRelease, currentVersion, MODRINTH_PAGE);

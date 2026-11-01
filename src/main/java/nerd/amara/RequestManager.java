@@ -1,8 +1,7 @@
 package nerd.amara;
 
 import nerd.amara.tiers.PlayerInfo;
-import net.minecraft.client.MinecraftClient;
-
+import net.minecraft.client.Minecraft;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -29,8 +28,8 @@ public class RequestManager {
     private static final Map<String, Long> lastForceRefresh = new ConcurrentHashMap<>();
 
     private static void dispatchOnClient(Runnable action) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.isOnThread()) {
+        Minecraft client = Minecraft.getInstance();
+        if (client.isSameThread()) {
             action.run();
         } else {
             client.execute(action);

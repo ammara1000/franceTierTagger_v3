@@ -1,23 +1,22 @@
 package nerd.amara.tiers;
 
-import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-
 import java.util.Locale;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 
 public enum GamemodeType {
     ALL("All", -1, "", null),
-    MACE("Mace", 0, "\uF007", Identifier.of("frtl", "gamemodes/mctiers")),
-    SMP("SMP", 1, "\uF004", Identifier.of("frtl", "gamemodes/mctiers")),
-    UHC("UHC", 2, "\uF001", Identifier.of("frtl", "gamemodes/mctiers")),
-    POT("Pot", 3, "\uF002", Identifier.of("frtl", "gamemodes/mctiers")),
-    CRYSTAL("Crystal", 4, "\uF000", Identifier.of("frtl", "gamemodes/mctiers")),
-    SWORD("Sword", 5, "\uF005", Identifier.of("frtl", "gamemodes/mctiers")),
-    DIASMP("DiaSMP", 6, "\uF007", Identifier.of("frtl", "gamemodes/subtiers")),
-    NETHPOT("NethPot", 7, "\uF003", Identifier.of("frtl", "gamemodes/mctiers")),
-    AXE("Axe", 8, "\uF006", Identifier.of("frtl", "gamemodes/mctiers")),
+    MACE("Mace", 0, "\uF007", Identifier.fromNamespaceAndPath("frtl", "gamemodes/mctiers")),
+    SMP("SMP", 1, "\uF004", Identifier.fromNamespaceAndPath("frtl", "gamemodes/mctiers")),
+    UHC("UHC", 2, "\uF001", Identifier.fromNamespaceAndPath("frtl", "gamemodes/mctiers")),
+    POT("Pot", 3, "\uF002", Identifier.fromNamespaceAndPath("frtl", "gamemodes/mctiers")),
+    CRYSTAL("Crystal", 4, "\uF000", Identifier.fromNamespaceAndPath("frtl", "gamemodes/mctiers")),
+    SWORD("Sword", 5, "\uF005", Identifier.fromNamespaceAndPath("frtl", "gamemodes/mctiers")),
+    DIASMP("DiaSMP", 6, "\uF007", Identifier.fromNamespaceAndPath("frtl", "gamemodes/subtiers")),
+    NETHPOT("NethPot", 7, "\uF003", Identifier.fromNamespaceAndPath("frtl", "gamemodes/mctiers")),
+    AXE("Axe", 8, "\uF006", Identifier.fromNamespaceAndPath("frtl", "gamemodes/mctiers")),
     MOD_OFF("Mod Off", -1, "", null);
 
     private final String displayName;
@@ -63,21 +62,21 @@ public enum GamemodeType {
         return String.valueOf((char) (base + offset));
     }
 
-    public Text getIconText() {
+    public Component getIconText() {
         return getIconText(false);
     }
 
-    public Text getIconText(boolean old) {
+    public Component getIconText(boolean old) {
         if (iconFontId == null || iconChar.isEmpty()) {
-            return Text.empty();
+            return Component.empty();
         }
         Identifier fontId = iconFontId;
         if (old) {
             fontId = this == DIASMP
-                ? Identifier.of("frtl", "gamemodes/old_subtiers")
-                : Identifier.of("frtl", "gamemodes/old");
+                ? Identifier.fromNamespaceAndPath("frtl", "gamemodes/old_subtiers")
+                : Identifier.fromNamespaceAndPath("frtl", "gamemodes/old");
         }
-        return Text.literal(iconChar).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(fontId)).withColor(0xFFFFFFFF));
+        return Component.literal(iconChar).setStyle(Style.EMPTY.withFont(new FontDescription.Resource(fontId)).withColor(0xFFFFFFFF));
     }
 
     public static GamemodeType fromName(String name) {

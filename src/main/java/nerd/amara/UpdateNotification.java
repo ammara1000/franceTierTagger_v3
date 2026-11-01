@@ -1,9 +1,9 @@
 package nerd.amara;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 
 import java.lang.reflect.Field;
@@ -73,7 +73,7 @@ public class UpdateNotification {
     public static void openModrinth() {
         dismissed = true;
         try {
-            Util.getOperatingSystem().open(URI.create(updateUrl));
+            Util.getPlatform().openUri(URI.create(updateUrl));
         } catch (Exception ignored) {
         }
     }
@@ -91,26 +91,26 @@ public class UpdateNotification {
     }
 
     public static int getWidth() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client == null || client.textRenderer == null) {
+        Minecraft client = Minecraft.getInstance();
+        if (client == null || client.font == null) {
             return 120;
         }
-        Text title = getTitle();
-        Text sub = getSubtitle();
-        int tWidth = client.textRenderer.getWidth(title);
-        int sWidth = client.textRenderer.getWidth(sub);
+        Component title = getTitle();
+        Component sub = getSubtitle();
+        int tWidth = client.font.width(title);
+        int sWidth = client.font.width(sub);
         int maxTextWidth = Math.round(Math.max(tWidth, sWidth) * TEXT_SCALE);
         return maxTextWidth + 26;
     }
 
-    public static void render(DrawContext context, int mouseX, int mouseY) {
+    public static void render(GuiGraphics context, int mouseX, int mouseY) {
         if (usedWalksy || !isVisible()) {
             currentRenderedX = -1000;
             return;
         }
 
-        MinecraftClient client = MinecraftClient.getInstance();
-        int screenWidth = client.getWindow().getScaledWidth();
+        Minecraft client = Minecraft.getInstance();
+        int screenWidth = client.getWindow().getGuiScaledWidth();
         int width = getWidth();
         int targetX = screenWidth - width - 8;
 
@@ -145,18 +145,18 @@ public class UpdateNotification {
         drawCircle(context, iconCX, iconCY, 5, 0xFF0284C7);
         drawDownloadIcon(context, iconCX, iconCY);
 
-        Text title = getTitle();
-        Text subtitle = getSubtitle();
+        Component title = getTitle();
+        Component subtitle = getSubtitle();
 
-        context.getMatrices().pushMatrix();
-        context.getMatrices().translate((float) (x + 18), (float) (y + 3));
-        context.getMatrices().scale(TEXT_SCALE, TEXT_SCALE);
-        context.drawText(client.textRenderer, title, 0, 0, 0xFFFFFFFF, false);
-        context.drawText(client.textRenderer, subtitle, 0, 11, 0xFF94A3B8, false);
-        context.getMatrices().popMatrix();
+        context.pose().pushMatrix();
+        context.pose().translate((float) (x + 18), (float) (y + 3));
+        context.pose().scale(TEXT_SCALE, TEXT_SCALE);
+        context.drawString(client.font, title, 0, 0, 0xFFFFFFFF, false);
+        context.drawString(client.font, subtitle, 0, 11, 0xFF94A3B8, false);
+        context.pose().popMatrix();
     }
 
-    private static void drawModernPill(DrawContext context, int x, int y, int width, int height, int bgColor, int borderColor) {
+    private static void drawModernPill(GuiGraphics context, int x, int y, int width, int height, int bgColor, int borderColor) {
         float r = height / 2.0f;
         for (int i = 0; i < height; i++) {
             float dy = (i + 0.5f) - r;
@@ -179,7 +179,7 @@ public class UpdateNotification {
         }
     }
 
-    private static void drawCircle(DrawContext context, int cx, int cy, int radius, int color) {
+    private static void drawCircle(GuiGraphics context, int cx, int cy, int radius, int color) {
         for (int dy = -radius; dy <= radius; dy++) {
             float halfW = (float) Math.sqrt(Math.max(0, radius * radius - dy * dy));
             int x1 = Math.round(cx - halfW);
@@ -188,7 +188,7 @@ public class UpdateNotification {
         }
     }
 
-    private static void drawDownloadIcon(DrawContext context, int cx, int cy) {
+    private static void drawDownloadIcon(GuiGraphics context, int cx, int cy) {
         context.fill(cx - 1, cy - 3, cx + 1, cy + 1, 0xFFFFFFFF);
         context.fill(cx - 2, cy - 1, cx - 1, cy, 0xFFFFFFFF);
         context.fill(cx + 1, cy - 1, cx + 2, cy, 0xFFFFFFFF);
@@ -221,8 +221,8 @@ public class UpdateNotification {
             }
 
             Class<?> wlToastClass = Class.forName("main.walksy.lib.core.toast.WLToast");
-            String titleStr = Text.translatable("francetiers_tagger.update.title", latest != null ? latest : "").getString();
-            String subStr = Text.translatable("francetiers_tagger.update.subtitle", current != null ? current : "").getString();
+            String titleStr = Component.translatable("francetiers_tagger.update.title", latest != null ? latest : "").getString();
+            String subStr = Component.translatable("francetiers_tagger.update.subtitle", current != null ? current : "").getString();
 
             Method ofMethod = wlToastClass.getMethod("of", String.class, String.class);
             Object toast = ofMethod.invoke(null, titleStr, subStr);
@@ -270,13 +270,13 @@ public class UpdateNotification {
         }
     }
 
-    private static Text getTitle() {
+    private static Component getTitle() {
         String ver = latestVersion != null ? latestVersion : "";
-        return Text.translatable("francetiers_tagger.update.title", ver);
+        return Component.translatable("francetiers_tagger.update.title", ver);
     }
 
-    private static Text getSubtitle() {
+    private static Component getSubtitle() {
         String cur = currentVersion != null ? currentVersion : "";
-        return Text.translatable("francetiers_tagger.update.subtitle", cur);
+        return Component.translatable("francetiers_tagger.update.subtitle", cur);
     }
 }

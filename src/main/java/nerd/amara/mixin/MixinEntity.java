@@ -5,10 +5,10 @@ import nerd.amara.Francetiers_tagger;
 import nerd.amara.ModConfig;
 import nerd.amara.PlayerInfoCache;
 import nerd.amara.ShowedTier;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.decoration.DisplayEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,13 +16,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Entity.class)
 public abstract class MixinEntity {
-    @Inject(method = "onTrackedDataSet", at = @At("RETURN"))
-    private void francetiers$onTrackedDataSet(TrackedData<?> data, CallbackInfo ci) {
-        if (!((Object) this instanceof DisplayEntity.TextDisplayEntity textDisplay)) {
+    @Inject(method = "onSyncedDataUpdated(Lnet/minecraft/network/syncher/EntityDataAccessor;)V", at = @At("RETURN"))
+    private void francetiers$onTrackedDataSet(EntityDataAccessor<?> data, CallbackInfo ci) {
+        if (!((Object) this instanceof Display.TextDisplay textDisplay)) {
             return;
         }
         Entity vehicle = textDisplay.getVehicle();
-        if (vehicle instanceof PlayerEntity player) {
+        if (vehicle instanceof Player player) {
             ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
             if (config.enabled && config.showInNametag) {
                 String pseudo = player.getName().getString();

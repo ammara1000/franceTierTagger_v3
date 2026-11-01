@@ -4,17 +4,16 @@ import me.shedaniel.autoconfig.AutoConfig;
 import nerd.amara.tiers.GamemodeType;
 import nerd.amara.tiers.PlayerInfo;
 import nerd.amara.tiers.TierRank;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
+import com.mojang.blaze3d.platform.NativeImage;
 import java.io.ByteArrayInputStream;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ public class TierScreen extends Screen {
     private static final Set<String> REGISTERED_AVATARS = new HashSet<>();
 
     public TierScreen(PlayerInfo playerInfo) {
-        super(Text.translatable("francetiers_tagger.screen.profile_title", playerInfo.pseudo));
+        super(Component.translatable("francetiers_tagger.screen.profile_title", playerInfo.pseudo));
         this.playerInfo = playerInfo;
         
         CompletableFuture.runAsync(() -> {
@@ -43,13 +42,13 @@ public class TierScreen extends Screen {
                 byte[] data = Http.getBytes(urlStr, Duration.ofSeconds(5));
                 try (ByteArrayInputStream bais = new ByteArrayInputStream(data)) {
                     NativeImage image = NativeImage.read(bais);
-                    MinecraftClient.getInstance().execute(() -> {
+                    Minecraft.getInstance().execute(() -> {
                         String avatarStr = "avatar_" + playerInfo.pseudo.toLowerCase(Locale.ROOT);
-                        this.playerAvatarId = Identifier.of("tier", avatarStr);
+                        this.playerAvatarId = Identifier.fromNamespaceAndPath("tier", avatarStr);
                         if (!REGISTERED_AVATARS.contains(avatarStr)) {
-                            NativeImageBackedTexture texture = new NativeImageBackedTexture(() -> avatarStr, image);
+                            DynamicTexture texture = new DynamicTexture(() -> avatarStr, image);
                             texture.upload();
-                            MinecraftClient.getInstance().getTextureManager().registerTexture(this.playerAvatarId, texture);
+                            Minecraft.getInstance().getTextureManager().register(this.playerAvatarId, texture);
                             REGISTERED_AVATARS.add(avatarStr);
                         } else {
                             image.close();
@@ -85,13 +84,13 @@ public class TierScreen extends Screen {
         int startY = getStartY();
         int buttonY = Math.min(this.height - 24, startY + windowHeight + 4);
         
-        this.addDrawableChild(ButtonWidget.builder(net.minecraft.screen.ScreenTexts.DONE, button -> this.close())
-                .dimensions(this.width / 2 - 50, buttonY, 100, 20)
+        this.addRenderableWidget(Button.builder(net.minecraft.network.chat.CommonComponents.GUI_DONE, button -> this.onClose())
+                .bounds(this.width / 2 - 50, buttonY, 100, 20)
                 .build());
     }
 
     @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.renderBackground(context, mouseX, mouseY, delta);
         
         int windowWidth = getWindowWidth();
@@ -104,7 +103,7 @@ public class TierScreen extends Screen {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
 
         int windowWidth = getWindowWidth();
@@ -119,23 +118,23 @@ public class TierScreen extends Screen {
         int avatarY = startY + 34;
         
         if (this.avatarLoaded && this.playerAvatarId != null) {
-            context.drawTexture(net.minecraft.client.gl.RenderPipelines.GUI_TEXTURED, this.playerAvatarId, avatarX, avatarY, 0f, 0f, 54, 120, 54, 120);
+            context.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, this.playerAvatarId, avatarX, avatarY, 0f, 0f, 54, 120, 54, 120);
         } else {
-            context.drawCenteredTextWithShadow(this.textRenderer, Text.translatable("francetiers_tagger.screen.loading"), avatarX + 27, avatarY + 54, 0xFFAAAAAA);
+            context.drawCenteredString(this.font, Component.translatable("francetiers_tagger.screen.loading"), avatarX + 27, avatarY + 54, 0xFFAAAAAA);
         }
 
-        Text titleText = Text.translatable("francetiers_tagger.screen.profile_title", playerInfo.pseudo);
-        int titleWidth = this.textRenderer.getWidth(titleText);
+        Component titleText = Component.translatable("francetiers_tagger.screen.profile_title", playerInfo.pseudo);
+        int titleWidth = this.font.width(titleText);
         
         if (playerInfo.region != null && !playerInfo.region.isEmpty()) {
             String regionText = playerInfo.region.toUpperCase(Locale.ROOT);
-            int regionWidth = this.textRenderer.getWidth(regionText);
+            int regionWidth = this.font.width(regionText);
             int badgeWidth = regionWidth + 8;
             int badgeHeight = 12;
             int totalWidth = titleWidth + 4 + badgeWidth;
             
             int titleStartX = this.width / 2 - totalWidth / 2;
-            context.drawTextWithShadow(this.textRenderer, titleText, titleStartX, startY + 10, 0xFFFFFFFF);
+            context.drawString(this.font, titleText, titleStartX, startY + 10, 0xFFFFFFFF);
             
             int badgeStartX = titleStartX + titleWidth + 4;
             int badgeY = startY + 9;
@@ -152,20 +151,20 @@ public class TierScreen extends Screen {
             };
             
             drawRoundedRect(context, badgeStartX, badgeY, badgeWidth, badgeHeight, regionColor);
-            context.drawText(this.textRenderer, regionText, badgeStartX + 4, badgeY + 2, 0xFFFFFFFF, false);
+            context.drawString(this.font, regionText, badgeStartX + 4, badgeY + 2, 0xFFFFFFFF, false);
         } else {
-            context.drawCenteredTextWithShadow(this.textRenderer, titleText, this.width / 2, startY + 10, 0xFFFFFFFF);
+            context.drawCenteredString(this.font, titleText, this.width / 2, startY + 10, 0xFFFFFFFF);
         }
         
         String rankStr = playerInfo.global_rank != null ? "#" + playerInfo.global_rank : "-";
         String ptsStr = playerInfo.total_points != null ? playerInfo.total_points : "0";
         
-        Text rankText = Text.translatable("francetiers_tagger.screen.global_rank", rankStr);
-        Text pointsText = Text.translatable("francetiers_tagger.screen.points", ptsStr);
-        int pointsWidth = this.textRenderer.getWidth(pointsText);
+        Component rankText = Component.translatable("francetiers_tagger.screen.global_rank", rankStr);
+        Component pointsText = Component.translatable("francetiers_tagger.screen.points", ptsStr);
+        int pointsWidth = this.font.width(pointsText);
 
-        context.drawTextWithShadow(this.textRenderer, rankText, startX + 14, startY + windowHeight - 18, 0xFFAAAAAA);
-        context.drawTextWithShadow(this.textRenderer, pointsText, startX + windowWidth - pointsWidth - 14, startY + windowHeight - 18, 0xFF55FF55);
+        context.drawString(this.font, rankText, startX + 14, startY + windowHeight - 18, 0xFFAAAAAA);
+        context.drawString(this.font, pointsText, startX + windowWidth - pointsWidth - 14, startY + windowHeight - 18, 0xFF55FF55);
 
         String[] row1 = {"Dia SMP", "Pot", "Nethpot", "SMP"};
         String[] row2 = {"Sword", "Vanilla", "Axe", "UHC"};
@@ -175,22 +174,22 @@ public class TierScreen extends Screen {
         int rowSpacing = Math.min(45, (windowHeight - 80) / 3);
         int gridY = startY + 38;
         
-        List<Text> tooltip = null;
+        List<Component> tooltip = null;
         tooltip = drawRow(context, row1, gridCenterX, gridY, spacing, mouseX, mouseY, tooltip);
         tooltip = drawRow(context, row2, gridCenterX, gridY + rowSpacing, spacing, mouseX, mouseY, tooltip);
         tooltip = drawRow(context, row3, gridCenterX, gridY + rowSpacing * 2, spacing, mouseX, mouseY, tooltip);
 
         if (tooltip != null) {
-            context.drawTooltip(this.textRenderer, tooltip, mouseX, mouseY);
+            context.setComponentTooltipForNextFrame(this.font, tooltip, mouseX, mouseY);
         }
     }
 
     private record PeakEntry(int badgeStartX, int badgeY, int badgeWidth, int badgeHeight, String peakTierCode, int peakPoints, TierRank peakRank) {}
 
-    private List<Text> drawRow(DrawContext context, String[] modes, int centerX, int y, int spacing, int mouseX, int mouseY, List<Text> currentTooltip) {
+    private List<Component> drawRow(GuiGraphics context, String[] modes, int centerX, int y, int spacing, int mouseX, int mouseY, List<Component> currentTooltip) {
         int totalWidth = (modes.length - 1) * spacing;
         int startX = centerX - totalWidth / 2;
-        List<Text> tooltip = currentTooltip;
+        List<Component> tooltip = currentTooltip;
         List<PeakEntry> peaks = new ArrayList<>();
         
         for (int i = 0; i < modes.length; i++) {
@@ -212,25 +211,25 @@ public class TierScreen extends Screen {
             
             ModConfig config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
             boolean isOld = config != null && config.oldIcons;
-            Text iconText = modeType.getIconText(isOld);
-            int iconWidth = this.textRenderer.getWidth(iconText);
+            Component iconText = modeType.getIconText(isOld);
+            int iconWidth = this.font.width(iconText);
             
-            context.drawText(this.textRenderer, iconText, x - iconWidth / 2, y, 0xFFFFFFFF, false);
+            context.drawString(this.font, iconText, x - iconWidth / 2, y, 0xFFFFFFFF, false);
             
             TierRank rank = TierRank.fromCode(tierText);
-            Text badgeText;
+            Component badgeText;
             if (rank == TierRank.NA) {
-                badgeText = Text.literal("-");
+                badgeText = Component.literal("-");
             } else {
                 int level = isOld ? 0 : rank.getLevel();
                 Identifier badgeFontId = isOld ? FontConstants.FONT_OLD_SMALL_ID : FontConstants.FONT_SMALL_ID;
                 String iconChar = modeType.getGamemodeChar(level);
                 if (!iconChar.isEmpty()) {
-                    badgeText = Text.empty()
-                        .append(Text.literal(iconChar).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(badgeFontId))))
-                        .append(Text.literal(" " + tierText));
+                    badgeText = Component.empty()
+                        .append(Component.literal(iconChar).setStyle(Style.EMPTY.withFont(new FontDescription.Resource(badgeFontId))))
+                        .append(Component.literal(" " + tierText));
                 } else {
-                    badgeText = Text.literal(tierText);
+                    badgeText = Component.literal(tierText);
                 }
             }
             
@@ -252,7 +251,7 @@ public class TierScreen extends Screen {
             }
 
             int badgeY = y + 16;
-            int textWidth = this.textRenderer.getWidth(badgeText);
+            int textWidth = this.font.width(badgeText);
             int badgeWidth = Math.max(28, textWidth + 8);
             int badgeHeight = 14;
             int badgeStartX = x - badgeWidth / 2;
@@ -265,7 +264,7 @@ public class TierScreen extends Screen {
         }
 
         for (PeakEntry p : peaks) {
-            context.drawText(this.textRenderer, Text.literal("★"), p.badgeStartX + p.badgeWidth + 1, p.badgeY + 2, 0xFFFFD700, true);
+            context.drawString(this.font, Component.literal("★"), p.badgeStartX + p.badgeWidth + 1, p.badgeY + 2, 0xFFFFD700, true);
 
             if (tooltip == null) {
                 int hitLeft = p.badgeStartX;
@@ -273,10 +272,10 @@ public class TierScreen extends Screen {
                 int hitTop = p.badgeY - 2;
                 int hitBottom = p.badgeY + p.badgeHeight + 2;
                 if (mouseX >= hitLeft && mouseX <= hitRight && mouseY >= hitTop && mouseY <= hitBottom) {
-                    Text peakFormatted = Text.literal(p.peakTierCode).setStyle(Style.EMPTY.withColor(p.peakRank.getColor()));
+                    Component peakFormatted = Component.literal(p.peakTierCode).setStyle(Style.EMPTY.withColor(p.peakRank.getColor()));
                     tooltip = List.of(
-                        Text.translatable("francetiers_tagger.screen.peak_tier", peakFormatted),
-                        Text.translatable("francetiers_tagger.screen.peak_points", String.valueOf(p.peakPoints))
+                        Component.translatable("francetiers_tagger.screen.peak_tier", peakFormatted),
+                        Component.translatable("francetiers_tagger.screen.peak_points", String.valueOf(p.peakPoints))
                     );
                 }
             }
@@ -285,18 +284,18 @@ public class TierScreen extends Screen {
         return tooltip;
     }
 
-    private void drawBadge(DrawContext context, int startX, int y, int badgeWidth, int badgeHeight, Text text, int textWidth, int color) {
+    private void drawBadge(GuiGraphics context, int startX, int y, int badgeWidth, int badgeHeight, Component text, int textWidth, int color) {
         drawRoundedRect(context, startX, y, badgeWidth, badgeHeight, color | 0xFF000000);
-        context.drawText(this.textRenderer, text, startX + (badgeWidth - textWidth) / 2, y + 3, 0xFFFFFFFF, false);
+        context.drawString(this.font, text, startX + (badgeWidth - textWidth) / 2, y + 3, 0xFFFFFFFF, false);
     }
 
-    private void drawRoundedRect(DrawContext context, int x, int y, int width, int height, int color) {
+    private void drawRoundedRect(GuiGraphics context, int x, int y, int width, int height, int color) {
         context.fill(x + 1, y, x + width - 1, y + height, color);
         context.fill(x, y + 1, x + 1, y + height - 1, color);
         context.fill(x + width - 1, y + 1, x + width, y + height - 1, color);
     }
 
-    private void drawRoundedRectBorder(DrawContext context, int x, int y, int width, int height, int color) {
+    private void drawRoundedRectBorder(GuiGraphics context, int x, int y, int width, int height, int color) {
         context.fill(x + 1, y, x + width - 1, y + 1, color);
         context.fill(x + 1, y + height - 1, x + width - 1, y + height, color);
         context.fill(x, y + 1, x + 1, y + height - 1, color);
@@ -304,7 +303,7 @@ public class TierScreen extends Screen {
     }
     
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 }
