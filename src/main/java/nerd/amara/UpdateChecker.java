@@ -73,7 +73,7 @@ public class UpdateChecker {
     public static String getCurrentVersion() {
         return FabricLoader.getInstance().getModContainer("francetiers_tagger")
                 .map(c -> c.getMetadata().getVersion().getFriendlyString())
-                .orElse("2.5.3");
+                .orElse("3.1.0");
     }
 
     public static boolean isNewer(String remote, String current) {
