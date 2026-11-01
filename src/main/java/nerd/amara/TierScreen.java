@@ -5,7 +5,7 @@ import nerd.amara.tiers.GamemodeType;
 import nerd.amara.tiers.PlayerInfo;
 import nerd.amara.tiers.TierRank;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -90,8 +90,8 @@ public class TierScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.renderBackground(context, mouseX, mouseY, delta);
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        super.extractBackground(context, mouseX, mouseY, delta);
         
         int windowWidth = getWindowWidth();
         int windowHeight = getWindowHeight();
@@ -103,8 +103,8 @@ public class TierScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        super.extractRenderState(context, mouseX, mouseY, delta);
 
         int windowWidth = getWindowWidth();
         int windowHeight = getWindowHeight();
@@ -120,7 +120,7 @@ public class TierScreen extends Screen {
         if (this.avatarLoaded && this.playerAvatarId != null) {
             context.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, this.playerAvatarId, avatarX, avatarY, 0f, 0f, 54, 120, 54, 120);
         } else {
-            context.drawCenteredString(this.font, Component.translatable("francetiers_tagger.screen.loading"), avatarX + 27, avatarY + 54, 0xFFAAAAAA);
+            context.centeredText(this.font, Component.translatable("francetiers_tagger.screen.loading"), avatarX + 27, avatarY + 54, 0xFFAAAAAA);
         }
 
         Component titleText = Component.translatable("francetiers_tagger.screen.profile_title", playerInfo.pseudo);
@@ -134,7 +134,7 @@ public class TierScreen extends Screen {
             int totalWidth = titleWidth + 4 + badgeWidth;
             
             int titleStartX = this.width / 2 - totalWidth / 2;
-            context.drawString(this.font, titleText, titleStartX, startY + 10, 0xFFFFFFFF);
+            context.text(this.font, titleText, titleStartX, startY + 10, 0xFFFFFFFF);
             
             int badgeStartX = titleStartX + titleWidth + 4;
             int badgeY = startY + 9;
@@ -151,9 +151,9 @@ public class TierScreen extends Screen {
             };
             
             drawRoundedRect(context, badgeStartX, badgeY, badgeWidth, badgeHeight, regionColor);
-            context.drawString(this.font, regionText, badgeStartX + 4, badgeY + 2, 0xFFFFFFFF, false);
+            context.text(this.font, regionText, badgeStartX + 4, badgeY + 2, 0xFFFFFFFF, false);
         } else {
-            context.drawCenteredString(this.font, titleText, this.width / 2, startY + 10, 0xFFFFFFFF);
+            context.centeredText(this.font, titleText, this.width / 2, startY + 10, 0xFFFFFFFF);
         }
         
         String rankStr = playerInfo.global_rank != null ? "#" + playerInfo.global_rank : "-";
@@ -163,8 +163,8 @@ public class TierScreen extends Screen {
         Component pointsText = Component.translatable("francetiers_tagger.screen.points", ptsStr);
         int pointsWidth = this.font.width(pointsText);
 
-        context.drawString(this.font, rankText, startX + 14, startY + windowHeight - 18, 0xFFAAAAAA);
-        context.drawString(this.font, pointsText, startX + windowWidth - pointsWidth - 14, startY + windowHeight - 18, 0xFF55FF55);
+        context.text(this.font, rankText, startX + 14, startY + windowHeight - 18, 0xFFAAAAAA);
+        context.text(this.font, pointsText, startX + windowWidth - pointsWidth - 14, startY + windowHeight - 18, 0xFF55FF55);
 
         String[] row1 = {"Dia SMP", "Pot", "Nethpot", "SMP"};
         String[] row2 = {"Sword", "Vanilla", "Axe", "UHC"};
@@ -186,7 +186,7 @@ public class TierScreen extends Screen {
 
     private record PeakEntry(int badgeStartX, int badgeY, int badgeWidth, int badgeHeight, String peakTierCode, int peakPoints, TierRank peakRank) {}
 
-    private List<Component> drawRow(GuiGraphics context, String[] modes, int centerX, int y, int spacing, int mouseX, int mouseY, List<Component> currentTooltip) {
+    private List<Component> drawRow(GuiGraphicsExtractor context, String[] modes, int centerX, int y, int spacing, int mouseX, int mouseY, List<Component> currentTooltip) {
         int totalWidth = (modes.length - 1) * spacing;
         int startX = centerX - totalWidth / 2;
         List<Component> tooltip = currentTooltip;
@@ -214,7 +214,7 @@ public class TierScreen extends Screen {
             Component iconText = modeType.getIconText(isOld);
             int iconWidth = this.font.width(iconText);
             
-            context.drawString(this.font, iconText, x - iconWidth / 2, y, 0xFFFFFFFF, false);
+            context.text(this.font, iconText, x - iconWidth / 2, y, 0xFFFFFFFF, false);
             
             TierRank rank = TierRank.fromCode(tierText);
             Component badgeText;
@@ -264,7 +264,7 @@ public class TierScreen extends Screen {
         }
 
         for (PeakEntry p : peaks) {
-            context.drawString(this.font, Component.literal("★"), p.badgeStartX + p.badgeWidth + 1, p.badgeY + 2, 0xFFFFD700, true);
+            context.text(this.font, Component.literal("★"), p.badgeStartX + p.badgeWidth + 1, p.badgeY + 2, 0xFFFFD700, true);
 
             if (tooltip == null) {
                 int hitLeft = p.badgeStartX;
@@ -284,18 +284,18 @@ public class TierScreen extends Screen {
         return tooltip;
     }
 
-    private void drawBadge(GuiGraphics context, int startX, int y, int badgeWidth, int badgeHeight, Component text, int textWidth, int color) {
+    private void drawBadge(GuiGraphicsExtractor context, int startX, int y, int badgeWidth, int badgeHeight, Component text, int textWidth, int color) {
         drawRoundedRect(context, startX, y, badgeWidth, badgeHeight, color | 0xFF000000);
-        context.drawString(this.font, text, startX + (badgeWidth - textWidth) / 2, y + 3, 0xFFFFFFFF, false);
+        context.text(this.font, text, startX + (badgeWidth - textWidth) / 2, y + 3, 0xFFFFFFFF, false);
     }
 
-    private void drawRoundedRect(GuiGraphics context, int x, int y, int width, int height, int color) {
+    private void drawRoundedRect(GuiGraphicsExtractor context, int x, int y, int width, int height, int color) {
         context.fill(x + 1, y, x + width - 1, y + height, color);
         context.fill(x, y + 1, x + 1, y + height - 1, color);
         context.fill(x + width - 1, y + 1, x + width, y + height - 1, color);
     }
 
-    private void drawRoundedRectBorder(GuiGraphics context, int x, int y, int width, int height, int color) {
+    private void drawRoundedRectBorder(GuiGraphicsExtractor context, int x, int y, int width, int height, int color) {
         context.fill(x + 1, y, x + width - 1, y + 1, color);
         context.fill(x + 1, y + height - 1, x + width - 1, y + height, color);
         context.fill(x, y + 1, x + 1, y + height - 1, color);

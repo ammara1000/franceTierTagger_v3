@@ -90,7 +90,7 @@ public class UpdateChecker {
     public static String getCurrentVersion() {
         return FabricLoader.getInstance().getModContainer("francetiers_tagger")
                 .map(c -> c.getMetadata().getVersion().getFriendlyString())
-                .orElse("3.1.1");
+                .orElse("3.1.0");
     }
 
     public static String getMinecraftVersion() {

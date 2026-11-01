@@ -3,7 +3,7 @@ package nerd.amara;
 import nerd.amara.tiers.GamemodeType;
 import nerd.amara.tiers.PlayerInfo;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -27,19 +27,19 @@ public class Keybinds {
     public static void registerKeybinds() {
         KeyMapping.Category category = KeyMapping.Category.register(Identifier.parse("francetierstagger"));
 
-        change_gamemode = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+        change_gamemode = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.mod.change_gamemode",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_UNKNOWN,
                 category
         ));
-        open_tier_screen = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+        open_tier_screen = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.mod.open_tier_screen",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_K,
                 category
         ));
-        auto_detect_kit = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+        auto_detect_kit = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.mod.auto_detect_kit",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_Y,
@@ -60,7 +60,7 @@ public class Keybinds {
                 holder.save();
                 refreshAllPlayerTags();
                 if (client.player != null) {
-                    client.player.displayClientMessage(Component.translatable("francetiers_tagger.message.gamemode_selected", Component.literal(config.gamemode.getDisplayName()).withStyle(s -> s.withColor(ChatFormatting.AQUA))), true);
+                    client.player.sendOverlayMessage(Component.translatable("francetiers_tagger.message.gamemode_selected", Component.literal(config.gamemode.getDisplayName()).withStyle(s -> s.withColor(ChatFormatting.AQUA))));
                 }
             }
 

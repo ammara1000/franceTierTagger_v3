@@ -29,9 +29,9 @@ public class InventoryChecker {
                 holder.save();
                 Keybinds.refreshAllPlayerTags();
             }
-            client.player.displayClientMessage(Component.translatable("francetiers_tagger.kit.detected", Component.literal(detected.getDisplayName()).withStyle(s -> s.withColor(ChatFormatting.AQUA).withBold(true))), true);
+            client.player.sendOverlayMessage(Component.translatable("francetiers_tagger.kit.detected", Component.literal(detected.getDisplayName()).withStyle(s -> s.withColor(ChatFormatting.AQUA).withBold(true))));
         } else if (showMessage) {
-            client.player.displayClientMessage(Component.translatable("francetiers_tagger.kit.not_found").withStyle(s -> s.withColor(ChatFormatting.RED)), true);
+            client.player.sendOverlayMessage(Component.translatable("francetiers_tagger.kit.not_found").withStyle(s -> s.withColor(ChatFormatting.RED)));
         }
     }
 

@@ -12,13 +12,14 @@ import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.AutoConfigClient;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal;
 
 public class CommandManager {
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher) {
@@ -52,7 +53,7 @@ public class CommandManager {
                 .then(literal("config")
                         .executes(context -> {
                             Minecraft.getInstance().execute(() -> {
-                                Minecraft.getInstance().setScreen(AutoConfig.getConfigScreen(ModConfig.class, Minecraft.getInstance().screen).get());
+                                Minecraft.getInstance().setScreen(AutoConfigClient.getConfigScreen(ModConfig.class, Minecraft.getInstance().screen).get());
                             });
                             return 1;
                         }))
@@ -124,7 +125,7 @@ public class CommandManager {
     }
 
     private static void sendMessage(Component text) {
-        Minecraft.getInstance().player.displayClientMessage(text, false);
+        Minecraft.getInstance().player.sendSystemMessage(text);
     }
 
     private static void sendSimpleError(Component message) {

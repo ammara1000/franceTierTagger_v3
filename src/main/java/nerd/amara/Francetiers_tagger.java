@@ -9,7 +9,8 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.minecraft.resources.Identifier;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.ChatFormatting;
@@ -44,7 +45,7 @@ public class Francetiers_tagger implements ClientModInitializer {
 
 		UpdateChecker.checkAsync();
 
-		HudRenderCallback.EVENT.register((drawContext, renderTickCounter) -> {
+		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(MOD_ID, "update_notification"), (drawContext, deltaTracker) -> {
 			if (Minecraft.getInstance().screen == null) {
 				UpdateNotification.triggerPendingIfAny();
 				UpdateNotification.render(drawContext, -1, -1);
@@ -60,9 +61,9 @@ public class Francetiers_tagger implements ClientModInitializer {
 				}
 			}).bounds(btnX, 8, btnW, UpdateNotification.HEIGHT).build();
 			updateBtn.setAlpha(0f);
-			Screens.getButtons(screen).add(updateBtn);
+			Screens.getWidgets(screen).add(updateBtn);
 
-			ScreenEvents.afterRender(screen).register((scr, drawContext, mouseX, mouseY, delta) -> {
+			ScreenEvents.afterExtract(screen).register((scr, drawContext, mouseX, mouseY, delta) -> {
 				int curW = UpdateNotification.getWidth();
 				updateBtn.setX(UpdateNotification.getX());
 				updateBtn.setY(UpdateNotification.getY());
@@ -140,7 +141,7 @@ public class Francetiers_tagger implements ClientModInitializer {
 			}
 		});
 
-		ClientTickEvents.END_WORLD_TICK.register(world -> {
+		ClientTickEvents.END_LEVEL_TICK.register(world -> {
 			for (Display.TextDisplay textDisplay : TextDisplayList) {
 				if (textDisplay.isRemoved()) {
 					TextDisplayList.remove(textDisplay);

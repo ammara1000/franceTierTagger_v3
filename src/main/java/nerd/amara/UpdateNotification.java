@@ -2,7 +2,7 @@ package nerd.amara;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 
@@ -103,7 +103,7 @@ public class UpdateNotification {
         return maxTextWidth + 26;
     }
 
-    public static void render(GuiGraphics context, int mouseX, int mouseY) {
+    public static void render(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         if (usedWalksy || !isVisible()) {
             currentRenderedX = -1000;
             return;
@@ -151,12 +151,12 @@ public class UpdateNotification {
         context.pose().pushMatrix();
         context.pose().translate((float) (x + 18), (float) (y + 3));
         context.pose().scale(TEXT_SCALE, TEXT_SCALE);
-        context.drawString(client.font, title, 0, 0, 0xFFFFFFFF, false);
-        context.drawString(client.font, subtitle, 0, 11, 0xFF94A3B8, false);
+        context.text(client.font, title, 0, 0, 0xFFFFFFFF, false);
+        context.text(client.font, subtitle, 0, 11, 0xFF94A3B8, false);
         context.pose().popMatrix();
     }
 
-    private static void drawModernPill(GuiGraphics context, int x, int y, int width, int height, int bgColor, int borderColor) {
+    private static void drawModernPill(GuiGraphicsExtractor context, int x, int y, int width, int height, int bgColor, int borderColor) {
         float r = height / 2.0f;
         for (int i = 0; i < height; i++) {
             float dy = (i + 0.5f) - r;
@@ -179,7 +179,7 @@ public class UpdateNotification {
         }
     }
 
-    private static void drawCircle(GuiGraphics context, int cx, int cy, int radius, int color) {
+    private static void drawCircle(GuiGraphicsExtractor context, int cx, int cy, int radius, int color) {
         for (int dy = -radius; dy <= radius; dy++) {
             float halfW = (float) Math.sqrt(Math.max(0, radius * radius - dy * dy));
             int x1 = Math.round(cx - halfW);
@@ -188,7 +188,7 @@ public class UpdateNotification {
         }
     }
 
-    private static void drawDownloadIcon(GuiGraphics context, int cx, int cy) {
+    private static void drawDownloadIcon(GuiGraphicsExtractor context, int cx, int cy) {
         context.fill(cx - 1, cy - 3, cx + 1, cy + 1, 0xFFFFFFFF);
         context.fill(cx - 2, cy - 1, cx - 1, cy, 0xFFFFFFFF);
         context.fill(cx + 1, cy - 1, cx + 2, cy, 0xFFFFFFFF);
