@@ -4,7 +4,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Util;
+import com.mojang.blaze3d.Blaze3D;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -73,7 +73,7 @@ public class UpdateNotification {
     public static void openModrinth() {
         dismissed = true;
         try {
-            Util.getPlatform().openUri(URI.create(updateUrl));
+            Blaze3D.openUri(URI.create(updateUrl));
         } catch (Exception ignored) {
         }
     }

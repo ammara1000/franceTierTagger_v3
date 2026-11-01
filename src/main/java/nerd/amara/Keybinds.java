@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
-import org.lwjgl.glfw.GLFW;
+
 
 import static nerd.amara.Francetiers_tagger.setTextInTextDisplay;
 
@@ -29,20 +29,20 @@ public class Keybinds {
 
         change_gamemode = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.mod.change_gamemode",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_UNKNOWN,
+                InputConstants.Type.KEYBOARD,
+                InputConstants.UNKNOWN.getValue(),
                 category
         ));
         open_tier_screen = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.mod.open_tier_screen",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_K,
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_K,
                 category
         ));
         auto_detect_kit = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.mod.auto_detect_kit",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_Y,
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_Y,
                 category
         ));
 
