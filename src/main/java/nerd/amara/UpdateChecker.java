@@ -30,7 +30,12 @@ public class UpdateChecker {
         CompletableFuture.runAsync(() -> {
             try {
                 String currentVersion = getCurrentVersion();
-                String body = Http.getString(MODRINTH_API, Duration.ofSeconds(5));
+                String mcVersion = getMinecraftVersion();
+                String apiUrl = MODRINTH_API;
+                if (!mcVersion.isEmpty()) {
+                    apiUrl += "?game_versions=%5B%22" + mcVersion + "%22%5D";
+                }
+                String body = Http.getString(apiUrl, Duration.ofSeconds(5));
                 JsonElement root = JsonParser.parseString(body);
                 if (!root.isJsonArray()) {
                     return;
@@ -45,6 +50,19 @@ public class UpdateChecker {
                     String versionType = obj.has("version_type") ? obj.get("version_type").getAsString() : "";
                     if (!"release".equalsIgnoreCase(versionType)) {
                         continue;
+                    }
+
+                    if (!mcVersion.isEmpty() && obj.has("game_versions") && obj.get("game_versions").isJsonArray()) {
+                        boolean matchesMc = false;
+                        for (JsonElement gv : obj.getAsJsonArray("game_versions")) {
+                            if (gv.isJsonPrimitive() && gv.getAsString().equals(mcVersion)) {
+                                matchesMc = true;
+                                break;
+                            }
+                        }
+                        if (!matchesMc) {
+                            continue;
+                        }
                     }
 
                     String versionNumber = obj.has("version_number") ? obj.get("version_number").getAsString() : null;
@@ -73,7 +91,13 @@ public class UpdateChecker {
     public static String getCurrentVersion() {
         return FabricLoader.getInstance().getModContainer("francetiers_tagger")
                 .map(c -> c.getMetadata().getVersion().getFriendlyString())
-                .orElse("3.1.0");
+                .orElse("3.1.1");
+    }
+
+    public static String getMinecraftVersion() {
+        return FabricLoader.getInstance().getModContainer("minecraft")
+                .map(c -> c.getMetadata().getVersion().getFriendlyString())
+                .orElse("");
     }
 
     public static boolean isNewer(String remote, String current) {
